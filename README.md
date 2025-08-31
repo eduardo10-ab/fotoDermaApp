@@ -196,7 +196,6 @@ npm start
 - `POST /api/patients` - Crear paciente
 - `GET /api/patients/:id` - Obtener paciente
 - `PUT /api/patients/:id` - Actualizar paciente
-- `DELETE /api/patients/:id` - Eliminar paciente
 - `GET /api/patients/search?q=término` - Buscar pacientes
 
 ### Consultas
@@ -204,17 +203,15 @@ npm start
 - `POST /api/consultations` - Crear consulta
 - `GET /api/consultations/:id` - Obtener consulta
 - `PUT /api/consultations/:id` - Actualizar consulta
-- `DELETE /api/consultations/:id` - Eliminar consulta
 - `POST /api/consultations/:id/photos` - Subir fotografías
 
-## Despliegue
 
-### Frontend (Vercel)
+### Frontend 
 1. Conectar repositorio a Vercel
 2. Configurar variables de entorno
 3. Desplegar automáticamente
 
-### Backend (Render/Heroku)
+### Backend 
 1. Configurar variables de entorno
 2. Configurar build command: `npm install`
 3. Configurar start command: `npm start`
@@ -222,14 +219,6 @@ npm start
 ### Base de Datos
 - Firebase Firestore (automático)
 - Firebase Storage (automático)
-
-## Contribución
-
-1. Fork el proyecto
-2. Crear una rama para la nueva feature (`git checkout -b feature/nueva-feature`)
-3. Commit los cambios (`git commit -am 'Agregar nueva feature'`)
-4. Push a la rama (`git push origin feature/nueva-feature`)
-5. Crear un Pull Request
 
 ## Licencia
 
@@ -239,16 +228,6 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE.md](LICENSE.m
 
 Para soporte técnico o preguntas:
 - Email: fuentesjoel723@gmail.com
-
-
-## Roadmap
-
-- [ ] Integración con IA para análisis de imágenes
-- [ ] Reportes médicos en PDF
-- [ ] Sistema de notificaciones
-- [ ] App móvil React Native
-- [ ] Integración con sistemas hospitalarios
-- [ ] Modo offline con sincronización
 
 ---
 
