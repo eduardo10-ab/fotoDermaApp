@@ -2,7 +2,7 @@
 
 FotoDerma es una aplicación web completa para médicos dermatólogos que permite gestionar pacientes, crear expedientes médicos, realizar consultas y almacenar fotografías médicas de forma segura.
 
-## 🚀 Características
+## Características
 
 - **Autenticación segura** con Firebase Auth (email/contraseña y Google)
 - **Gestión de pacientes** completa con expedientes médicos
@@ -13,7 +13,7 @@ FotoDerma es una aplicación web completa para médicos dermatólogos que permit
 - **Interfaz moderna** y responsiva con React + Tailwind CSS
 - **Configuraciones personalizables** (idioma, zoom)
 
-## 🛠️ Tecnologías
+## Tecnologías
 
 ### Frontend
 - **React** 18.2.0
@@ -36,7 +36,7 @@ FotoDerma es una aplicación web completa para médicos dermatólogos que permit
 - **Firebase Storage** para fotografías
 - **Firebase Authentication** para usuarios
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 fotoderma/
@@ -86,7 +86,7 @@ fotoderma/
     └── .env
 ```
 
-## 🔧 Instalación y Configuración
+## Instalación y Configuración
 
 ### Prerrequisitos
 - Node.js >= 16.0.0
@@ -152,7 +152,7 @@ Iniciar la aplicación:
 npm start
 ```
 
-## 📱 Uso de la Aplicación
+## Uso de la Aplicación
 
 ### Autenticación
 - Registro/Login con email y contraseña
@@ -175,7 +175,7 @@ npm start
 - Ajustar nivel de zoom de la aplicación
 - Gestión de cuentas
 
-## 🔒 Seguridad
+## Seguridad
 
 - Autenticación basada en Firebase Auth
 - Tokens JWT verificados en cada petición
@@ -184,7 +184,7 @@ npm start
 - CORS configurado correctamente
 - Headers de seguridad con Helmet
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### Autenticación
 - `POST /api/auth/verify` - Verificar token
@@ -207,7 +207,7 @@ npm start
 - `DELETE /api/consultations/:id` - Eliminar consulta
 - `POST /api/consultations/:id/photos` - Subir fotografías
 
-## 🚀 Despliegue
+## Despliegue
 
 ### Frontend (Vercel)
 1. Conectar repositorio a Vercel
@@ -223,7 +223,7 @@ npm start
 - Firebase Firestore (automático)
 - Firebase Storage (automático)
 
-## 🤝 Contribución
+## Contribución
 
 1. Fork el proyecto
 2. Crear una rama para la nueva feature (`git checkout -b feature/nueva-feature`)
@@ -231,15 +231,15 @@ npm start
 4. Push a la rama (`git push origin feature/nueva-feature`)
 5. Crear un Pull Request
 
-## 📄 Licencia
+## Licencia
 
 Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE.md](LICENSE.md) para detalles.
 
-## 📞 Soporte
+## Soporte
 
 Para soporte técnico o preguntas:
-- Email: soporte@fotoderma.com
-- Issues: [GitHub Issues](https://github.com/usuario/fotoderma/issues)
+- Email: fuentesjoel723@gmail.com
+
 
 ## 📋 Roadmap
 
@@ -252,4 +252,4 @@ Para soporte técnico o preguntas:
 
 ---
 
-**FotoDerma v1.0.0** - Desarrollado con ❤️ para profesionales de la salud
+**FotoDerma v1.0.0** - Desarrollado para profesionales de la salud
