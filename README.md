@@ -241,7 +241,7 @@ Para soporte técnico o preguntas:
 - Email: fuentesjoel723@gmail.com
 
 
-## 📋 Roadmap
+## Roadmap
 
 - [ ] Integración con IA para análisis de imágenes
 - [ ] Reportes médicos en PDF
