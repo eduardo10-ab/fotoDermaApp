@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Transitions */
+* {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Focus styles */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+}
+
+/* Button animations */
+button {
+  transform: translateY(0);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+/* Loading animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.z-40 {
+  z-index: 40;
+}
+
+.z-50 {
+  z-index: 50;
+}
+
+.z-60 {
+  z-index: 60;
+}
+
+/* Asegurar que el modal principal tenga menor z-index cuando la cámara está activa */
+.modal-behind-camera {
+  z-index: 40 !important;
+}
+
+/* Asegurar que la cámara siempre esté arriba */
+.camera-modal {
+  z-index: 60 !important;
+}
+
+/* Prevenir scroll del body cuando el modal está abierto */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* Mejorar la visibilidad del modal de cámara */
+.camera-overlay {
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(2px);
+}
+
+/* Transiciones suaves para los modales */
+.modal-enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.modal-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.modal-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.modal-exit-active {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 0.2s, transform 0.2s;
+}

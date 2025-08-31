@@ -1,0 +1,15 @@
+# Forzar a que todos los archivos JS, JSX, JSON y CSS usen LF
+*.js text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+
+# Markdown también con LF
+*.md text eol=lf
+
+# Archivos binarios que Git no debe tocar
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.svg binary
