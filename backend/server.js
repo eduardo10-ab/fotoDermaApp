@@ -5,8 +5,11 @@ const compression = require('compression');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
+
+// Configurar zona horaria
 process.env.TZ = 'America/El_Salvador';
 
+// Importar rutas
 const authRoutes = require('./routes/authRoutes');
 const patientRoutes = require('./routes/patientRoutes');
 const consultationRoutes = require('./routes/consultationRoutes');
@@ -14,23 +17,7 @@ const consultationRoutes = require('./routes/consultationRoutes');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Security middleware
-app.use(helmet({
-  crossOriginEmbedderPolicy: false // Para compatibilidad con Vercel
-}));
-app.use(compression());
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.'
-});
-app.use('/api/', limiter);
-
-// CORS configuration - ACTUALIZADO
-// CORS configuration - CORREGIDO (una sola configuración)
-// CORS configuration - SIMPLIFICADO
+// Configuración CORS - UNA SOLA VEZ
 const corsOptions = {
   origin: [
     'http://localhost:3000',
@@ -40,58 +27,44 @@ const corsOptions = {
   ].filter(Boolean),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200
 };
 
-app.use(cors(corsOptions));
-
-// Logging middleware
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path}`);
-  next();
-});
-
-
-// Middleware adicional para logging y manejo de preflight
-app.use((req, res, next) => {
-  console.log(`🔥 ${req.method} ${req.path} - Origin: ${req.headers.origin || 'none'}`);
-  
-  if (req.method === 'OPTIONS') {
-    console.log('✈️ Preflight request handled');
-    res.status(200).end();
-    return;
+// Middleware de seguridad
+app.use(helmet({
+  crossOriginEmbedderPolicy: false,
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
   }
-  
-  next();
-});
-app.use(cors(corsOptions));
-
-const cors = require('cors');
-app.use(cors({
-  origin: ['https://fotodermaapp.netlify.app', 'http://localhost:3000']
 }));
 
-// Middleware adicional para manejar preflight requests
-app.use((req, res, next) => {
-  console.log(`📥 ${req.method} ${req.path} - Origin: ${req.headers.origin || 'none'}`);
-  
-  // Headers adicionales para CORS
-  res.header('Access-Control-Allow-Credentials', 'true');
-  
-  if (req.method === 'OPTIONS') {
-    console.log('✈️ Preflight request handled');
-    res.status(200).end();
-    return;
-  }
-  
-  next();
+// Compresión
+app.use(compression());
+
+// CORS - aplicar una sola vez
+app.use(cors(corsOptions));
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
 });
+app.use('/api/', limiter);
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Logging - Solo errores en producción
+// Logging middleware
 if (process.env.NODE_ENV === 'production') {
   app.use(morgan('combined', {
     skip: function (req, res) { 
@@ -101,6 +74,12 @@ if (process.env.NODE_ENV === 'production') {
 } else {
   app.use(morgan('dev'));
 }
+
+// Middleware de logging personalizado (simplificado)
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -112,7 +91,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Root endpoint para verificar que la API funciona
+// Root endpoint
 app.get('/', (req, res) => {
   res.json({
     message: 'FotoDerma API - Backend funcionando correctamente',
@@ -143,7 +122,7 @@ app.use('*', (req, res) => {
 app.use((err, req, res, next) => {
   console.error('Error:', err);
   
-  const status = err.status || 500;
+  const status = err.status || err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
   
   res.status(status).json({
@@ -152,7 +131,10 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server (solo si no es importado como módulo)
+// Para Vercel, exportar la app
+module.exports = app;
+
+// Solo iniciar servidor si se ejecuta directamente (no en Vercel)
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`FotoDerma API server running on port ${PORT}`);
@@ -160,6 +142,3 @@ if (require.main === module) {
     console.log(`Entorno: ${process.env.NODE_ENV || 'development'}`);
   });
 }
-
-// IMPORTANTE: Esta línea debe estar al final
-module.exports = app;
