@@ -3,16 +3,12 @@ import axios from 'axios';
 // Configuración base de la API
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://foto-derma-app-backend.vercel.app/api';
 
-// URL base del backend
-const BACKEND_BASE_URL = 'https://foto-derma-app-backend.vercel.app';
-
 console.log('🌐 API Base URL:', API_BASE_URL);
-console.log('🌐 Backend Base URL:', BACKEND_BASE_URL);
 
 // Crear instancia de axios con configuración por defecto
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000, // 30 segundos
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -30,15 +26,10 @@ api.interceptors.request.use(
     const token = getAuthToken();
     
     if (token) {
-      // Asegurarse de que el formato del header sea correcto
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('🔑 Token agregado a la petición');
-    } else {
-      console.warn('⚠️ No hay token disponible');
     }
     
     console.log(`📤 ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
-    console.log('Headers:', config.headers);
     
     return config;
   },
@@ -51,7 +42,7 @@ api.interceptors.request.use(
 // Interceptor para manejar respuestas y errores
 api.interceptors.response.use(
   (response) => {
-    console.log(`📥 ${response.status} ${response.config.url}`, response.data);
+    console.log(`📥 ${response.status} ${response.config.url}`);
     return response;
   },
   async (error) => {
@@ -63,32 +54,29 @@ api.interceptors.response.use(
       message: error.message
     });
 
-    // Manejar errores específicos
+    // Manejar errores 401
     if (error.response?.status === 401) {
       console.log('🔒 Token inválido o expirado');
       
       // Intentar refrescar el token si es posible
-      const { auth } = await import('../services/firebase');
-      if (auth.currentUser) {
-        try {
+      try {
+        const { auth } = await import('../services/firebase');
+        if (auth.currentUser) {
           console.log('🔄 Intentando refrescar token...');
-          const newToken = await auth.currentUser.getIdToken(true); // Force refresh
+          const newToken = await auth.currentUser.getIdToken(true);
           localStorage.setItem('firebaseToken', newToken);
           
           // Reintentar la petición original con el nuevo token
           error.config.headers.Authorization = `Bearer ${newToken}`;
           return api.request(error.config);
-        } catch (refreshError) {
-          console.error('❌ Error refrescando token:', refreshError);
-          // Si no se puede refrescar, limpiar y redirigir
-          localStorage.removeItem('firebaseToken');
-          window.location.href = '/login';
         }
-      } else {
-        // No hay usuario, redirigir a login
-        localStorage.removeItem('firebaseToken');
-        window.location.href = '/login';
+      } catch (refreshError) {
+        console.error('❌ Error refrescando token:', refreshError);
       }
+      
+      // Si no se puede refrescar, limpiar y redirigir
+      localStorage.removeItem('firebaseToken');
+      window.location.href = '/login';
     }
 
     return Promise.reject(error);
@@ -99,7 +87,7 @@ api.interceptors.response.use(
 export const apiService = {
   // Test de conectividad (sin auth)
   testConnection: () => {
-    return axios.get(`${BACKEND_BASE_URL}/health`, {
+    return axios.get('https://foto-derma-app-backend.vercel.app/health', {
       timeout: 10000
     });
   },
@@ -126,7 +114,7 @@ export const apiService = {
   }),
 
   // Auth endpoints
-  verifyToken: () => api.post('/auth/verify'), // POST según tu ruta
+  verifyToken: () => api.post('/auth/verify'),
   getCurrentUser: () => api.get('/auth/me'),
   updateUserProfile: (data) => api.put('/auth/profile', data),
 };
