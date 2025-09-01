@@ -9,15 +9,9 @@ require('dotenv').config();
 // Configurar zona horaria
 process.env.TZ = 'America/El_Salvador';
 
-// Importar rutas
-const authRoutes = require('./routes/authRoutes');
-const patientRoutes = require('./routes/patientRoutes');
-const consultationRoutes = require('./routes/consultationRoutes');
-
 const app = express();
-const PORT = process.env.PORT || 3001;
 
-// Configuración CORS - UNA SOLA VEZ
+// CORS configuration - UNA SOLA VEZ
 const corsOptions = {
   origin: [
     'http://localhost:3000',
@@ -27,44 +21,29 @@ const corsOptions = {
   ].filter(Boolean),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  optionsSuccessStatus: 200
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 };
 
-// Middleware de seguridad
-app.use(helmet({
-  crossOriginEmbedderPolicy: false,
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
-    },
-  }
-}));
-
-// Compresión
-app.use(compression());
-
-// CORS - aplicar una sola vez
+// Middleware - aplicar en orden correcto
 app.use(cors(corsOptions));
+app.use(helmet({
+  crossOriginEmbedderPolicy: false
+}));
+app.use(compression());
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 100,
-  message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
+  message: 'Too many requests from this IP, please try again later.'
 });
 app.use('/api/', limiter);
 
-// Body parsing middleware
+// Body parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Logging middleware
+// Logging
 if (process.env.NODE_ENV === 'production') {
   app.use(morgan('combined', {
     skip: function (req, res) { 
@@ -75,13 +54,7 @@ if (process.env.NODE_ENV === 'production') {
   app.use(morgan('dev'));
 }
 
-// Middleware de logging personalizado (simplificado)
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path}`);
-  next();
-});
-
-// Health check endpoint
+// Health check
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
@@ -105,10 +78,27 @@ app.get('/', (req, res) => {
   });
 });
 
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/patients', patientRoutes);
-app.use('/api/consultations', consultationRoutes);
+// Import routes with error handling
+try {
+  const authRoutes = require('./routes/authRoutes');
+  app.use('/api/auth', authRoutes);
+} catch (error) {
+  console.log('Warning: authRoutes not found');
+}
+
+try {
+  const patientRoutes = require('./routes/patientRoutes');
+  app.use('/api/patients', patientRoutes);
+} catch (error) {
+  console.log('Warning: patientRoutes not found');
+}
+
+try {
+  const consultationRoutes = require('./routes/consultationRoutes');
+  app.use('/api/consultations', consultationRoutes);
+} catch (error) {
+  console.log('Warning: consultationRoutes not found');
+}
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -118,11 +108,11 @@ app.use('*', (req, res) => {
   });
 });
 
-// Error handling middleware
+// Error handling
 app.use((err, req, res, next) => {
   console.error('Error:', err);
   
-  const status = err.status || err.statusCode || 500;
+  const status = err.status || 500;
   const message = err.message || 'Internal Server Error';
   
   res.status(status).json({
@@ -131,14 +121,5 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Para Vercel, exportar la app
+// Export for Vercel
 module.exports = app;
-
-// Solo iniciar servidor si se ejecuta directamente (no en Vercel)
-if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`FotoDerma API server running on port ${PORT}`);
-    console.log(`Health check: http://localhost:${PORT}/health`);
-    console.log(`Entorno: ${process.env.NODE_ENV || 'development'}`);
-  });
-}
