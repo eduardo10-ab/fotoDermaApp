@@ -1,15 +1,154 @@
 {
-  "short_name": "FotoDerma",
   "name": "FotoDerma - Sistema Médico Dermatológico",
+  "short_name": "FotoDerma",
+  "description": "Sistema profesional para dermatólogos para gestión de pacientes y diagnósticos médicos",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#233f4c",
+  "background_color": "#ffffff",
+  "lang": "es-ES",
+  "dir": "ltr",
+  "categories": ["medical", "health", "productivity"],
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "/icons/icon-48x48.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-168x168.png",
+      "sizes": "168x168",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-256x256.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#334155",
-  "background_color": "#ffffff"
+  "shortcuts": [
+    {
+      "name": "Nuevo Paciente",
+      "short_name": "Nuevo",
+      "description": "Agregar un nuevo paciente al sistema",
+      "url": "/new-patient",
+      "icons": [
+        {
+          "src": "/icons/shortcut-new-patient.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Lista de Pacientes",
+      "short_name": "Pacientes",
+      "description": "Ver lista de todos los pacientes",
+      "url": "/patients",
+      "icons": [
+        {
+          "src": "/icons/shortcut-patients.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Nueva Consulta",
+      "short_name": "Consulta",
+      "description": "Crear nueva consulta médica",
+      "url": "/new-consultation",
+      "icons": [
+        {
+          "src": "/icons/shortcut-consultation.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/share-target",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "files",
+          "accept": ["image/*"]
+        }
+      ]
+    }
+  },
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop-dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Dashboard principal de FotoDerma"
+    },
+    {
+      "src": "/screenshots/mobile-patient-list.png",
+      "sizes": "375x812",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Lista de pacientes en móvil"
+    }
+  ],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "handle_links": "preferred",
+  "protocol_handlers": [
+    {
+      "protocol": "web+fotoderma",
+      "url": "/patient/%s"
+    }
+  ]
 }
