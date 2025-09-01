@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Camera, X, RotateCcw, Upload } from 'lucide-react';
+import { Camera, X, RotateCcw } from 'lucide-react';
 
 /**
  * Componente de cámara que permite capturar fotos desde el dispositivo
