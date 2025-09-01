@@ -1,24 +1,24 @@
 {
   "version": 2,
   "name": "fotoderma-backend",
-  "functions": {
-    "backend/server.js": {
-      "runtime": "nodejs18.x",
-      "maxDuration": 30
+  "builds": [
+    {
+      "src": "backend/server.js",
+      "use": "@vercel/node"
     }
-  },
-  "rewrites": [
+  ],
+  "routes": [
     {
-      "source": "/health",
-      "destination": "/backend/server.js"
+      "src": "/health",
+      "dest": "backend/server.js"
     },
     {
-      "source": "/api/(.*)",
-      "destination": "/backend/server.js"
+      "src": "/api/(.*)",
+      "dest": "backend/server.js"
     },
     {
-      "source": "/(.*)",
-      "destination": "/backend/server.js"
+      "src": "/(.*)",
+      "dest": "backend/server.js"
     }
   ],
   "env": {
