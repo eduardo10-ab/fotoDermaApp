@@ -2,15 +2,14 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
-
 const firebaseConfig = {
-  apiKey: "AIzaSyCumMUbfteWSb96zQNMoC51iw6YSE3KXpw",
-  authDomain: "fotoderma-12b1a.firebaseapp.com",
-  projectId: "fotoderma-12b1a",
-  storageBucket: "fotoderma-12b1a.firebasestorage.app",
-  messagingSenderId: "22087608948",
-  appId: "1:22087608948:web:2e8aeb51830b9f39ab7f21",
-  measurementId: "G-1CVVKGTT70"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
 // Inicializar Firebase

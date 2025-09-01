@@ -58,23 +58,6 @@ const ProtectedRoute = ({ children }) => {
   );
 };
 
-// App Routes Component - ELIMINADO EL CHEQUEO DUPLICADO
-const AppRoutes = () => {
-  return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/patients" element={<Patients />} />
-      <Route path="/patients/:id" element={<PatientDetails />} />
-      <Route path="/patient-details/:patientId" element={<PatientDetails />} />
-      <Route path="/new-patient" element={<NewPatient />} />
-      <Route path="/new-consultation/:patientId" element={<NewConsultation />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
-    </Routes>
-  );
-};
-
 function App() {
   // Aplicar zoom guardado al inicializar la aplicación
   useEffect(() => {
@@ -92,21 +75,67 @@ function App() {
 
   return (
     <AuthProvider>
-      <Router>
+      <Router future={{ v7_relativeSplatPath: true }}>
         <div className="App">
           <Routes>
             {/* Ruta pública de login */}
             <Route path="/login" element={<LoginRoute />} />
             
-            {/* Todas las demás rutas son protegidas */}
-            <Route 
-              path="/*" 
-              element={
-                <ProtectedRoute>
-                  <AppRoutes />
-                </ProtectedRoute>
-              } 
-            />
+            {/* Rutas protegidas individuales - SIN SPLAT ROUTE */}
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Navigate to="/dashboard" replace />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/patients" element={
+              <ProtectedRoute>
+                <Patients />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/patients/:id" element={
+              <ProtectedRoute>
+                <PatientDetails />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/patient-details/:patientId" element={
+              <ProtectedRoute>
+                <PatientDetails />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/new-patient" element={
+              <ProtectedRoute>
+                <NewPatient />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/new-consultation/:patientId" element={
+              <ProtectedRoute>
+                <NewConsultation />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            } />
+            
+            {/* Catch-all route */}
+            <Route path="*" element={
+              <ProtectedRoute>
+                <Navigate to="/dashboard" replace />
+              </ProtectedRoute>
+            } />
           </Routes>
         </div>
       </Router>
@@ -118,7 +147,7 @@ function App() {
 const LoginRoute = () => {
   const { user, loading } = useAuth();
   
-  console.log('🔒 LoginRoute - User:', user ? 'Logged in' : 'Not logged in', 'Loading:', loading);
+  console.log('🔐 LoginRoute - User:', user ? 'Logged in' : 'Not logged in', 'Loading:', loading);
   
   if (loading) {
     return (
