@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { auth } from './firebase';
 
 // Configurar base URL de la API
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://foto-derma-app-backend.vercel.app';
@@ -11,16 +10,29 @@ console.log('📋 Available env vars:', Object.keys(process.env).filter(key => k
 // Crear instancia de axios
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000, // 10 segundos timeout
+  timeout: 30000, // Aumentado a 30 segundos para Vercel
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Interceptor para logging (útil para debug)
+// Interceptor para agregar token de autenticación automáticamente
 api.interceptors.request.use(
   (config) => {
+    // Obtener token del localStorage (o donde lo guardes)
+    const token = localStorage.getItem('firebaseToken') || localStorage.getItem('authToken');
+    
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    
     console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    if (token) {
+      console.log('🔑 Token included in request');
+    } else {
+      console.log('⚠️ No token found for request');
+    }
+    
     return config;
   },
   (error) => {
@@ -36,6 +48,16 @@ api.interceptors.response.use(
   },
   (error) => {
     console.error('❌ API Response Error:', error.response?.status, error.message);
+    
+    // Si es 401, limpiar token y redirigir a login
+    if (error.response?.status === 401) {
+      console.log('🚫 Unauthorized - clearing token');
+      localStorage.removeItem('firebaseToken');
+      localStorage.removeItem('authToken');
+      // Opcional: redirigir a login
+      // window.location.href = '/login';
+    }
+    
     return Promise.reject(error);
   }
 );
@@ -43,7 +65,7 @@ api.interceptors.response.use(
 // Test de conectividad
 export const testConnection = async () => {
   try {
-    const response = await api.get('/');
+    const response = await api.get('/api/health'); // Agregado /api/
     console.log('Backend connection successful:', response.data);
     return true;
   } catch (error) {
@@ -52,28 +74,27 @@ export const testConnection = async () => {
   }
 };
 
-// Patients API
+// Patients API - TODAS las rutas con prefijo /api/
 export const patientsAPI = {
-  getAll: () => api.get('/patients'),
-  getById: (id) => api.get(`/patients/${id}`),
-  create: (patientData) => api.post('/patients', patientData),
-  update: (id, patientData) => api.put(`/patients/${id}`, patientData),
-  delete: (id) => api.delete(`/patients/${id}`),
-  search: (query) => api.get(`/patients/search?q=${encodeURIComponent(query)}`),
+  getAll: () => api.get('/api/patients'),
+  getById: (id) => api.get(`/api/patients/${id}`),
+  create: (patientData) => api.post('/api/patients', patientData),
+  update: (id, patientData) => api.put(`/api/patients/${id}`, patientData),
+  delete: (id) => api.delete(`/api/patients/${id}`),
+  search: (query) => api.get(`/api/patients/search?q=${encodeURIComponent(query)}`),
 };
 
-// Consultations API
+// Consultations API - TODAS las rutas con prefijo /api/
 export const consultationsAPI = {
-  getAll: () => api.get('/consultations'),
-  getById: (id) => api.get(`/consultations/${id}`),
-  getByPatientId: (patientId) => api.get(`/consultations/patient/${patientId}`),
-  create: (consultationData) => api.post('/consultations', consultationData),  
-  // Función actualizada: createFollowUp ahora usa el endpoint correcto
-  createFollowUp: (followUpData) => api.post('/consultations/followup', followUpData),
-  update: (id, consultationData) => api.put(`/consultations/${id}`, consultationData),
-  delete: (id) => api.delete(`/consultations/${id}`),
+  getAll: () => api.get('/api/consultations'),
+  getById: (id) => api.get(`/api/consultations/${id}`),
+  getByPatientId: (patientId) => api.get(`/api/consultations/patient/${patientId}`),
+  create: (consultationData) => api.post('/api/consultations', consultationData),  
+  createFollowUp: (followUpData) => api.post('/api/consultations/followup', followUpData),
+  update: (id, consultationData) => api.put(`/api/consultations/${id}`, consultationData),
+  delete: (id) => api.delete(`/api/consultations/${id}`),
   uploadPhoto: (consultationId, formData) => 
-    api.post(`/consultations/${consultationId}/photos`, formData, {
+    api.post(`/api/consultations/${consultationId}/photos`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -81,17 +102,19 @@ export const consultationsAPI = {
     }),
     
   getConsultationsWithFollowUps: (patientId) => 
-    api.get(`/consultations/patient/${patientId}/with-followups`),
+    api.get(`/api/consultations/patient/${patientId}/with-followups`),
 };
 
-// Auth API
+// Auth API - TODAS las rutas con prefijo /api/
 export const authAPI = {
-  verifyToken: (token) => api.post('/auth/verify', { token }),
+  verifyToken: (token) => api.post('/api/auth/verify', { token }),
+  getCurrentUser: () => api.get('/api/auth/me'),
+  updateProfile: (profileData) => api.put('/api/auth/profile', profileData),
 };
 
 // Health check del backend
 export const healthAPI = {
-  check: () => api.get('/health')
+  check: () => api.get('/api/health')
 };
 
 export default api;

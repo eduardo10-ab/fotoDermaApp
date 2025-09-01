@@ -28,9 +28,6 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// CORS configuration - ACTUALIZADO con variables existentes
-// En server.js - actualizar la configuración CORS
-
 // CORS configuration - ACTUALIZADO
 const corsOptions = {
   origin: function (origin, callback) {
@@ -60,8 +57,12 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   optionsSuccessStatus: 200
 };
-
 app.use(cors(corsOptions));
+
+const cors = require('cors');
+app.use(cors({
+  origin: ['https://fotodermaapp.netlify.app', 'http://localhost:3000']
+}));
 
 // Middleware adicional para manejar preflight requests
 app.use((req, res, next) => {

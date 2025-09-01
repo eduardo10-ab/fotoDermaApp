@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [savedAccounts, setSavedAccounts] = useState([]);
+  const [token, setToken] = useState(null); // Nuevo estado para el token
 
   // Cargar cuentas guardadas del localStorage
   useEffect(() => {
@@ -40,6 +41,31 @@ export const AuthProvider = ({ children }) => {
 
     loadSavedAccounts();
   }, []);
+
+  // Función para obtener y guardar el token de Firebase
+  const updateFirebaseToken = async (firebaseUser) => {
+    if (firebaseUser) {
+      try {
+        console.log('🔑 Obteniendo token de Firebase...');
+        const idToken = await firebaseUser.getIdToken();
+        console.log('✅ Token obtenido exitosamente');
+        
+        // Guardar token en estado y localStorage
+        setToken(idToken);
+        localStorage.setItem('firebaseToken', idToken);
+        
+        return idToken;
+      } catch (error) {
+        console.error('❌ Error obteniendo token:', error);
+        return null;
+      }
+    } else {
+      // Limpiar token si no hay usuario
+      setToken(null);
+      localStorage.removeItem('firebaseToken');
+      return null;
+    }
+  };
 
   // Guardar cuenta en localStorage
   const saveAccountToStorage = (user) => {
@@ -81,6 +107,10 @@ export const AuthProvider = ({ children }) => {
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
       saveAccountToStorage(result.user);
+      
+      // Obtener token después del login exitoso
+      await updateFirebaseToken(result.user);
+      
       return { success: true, user: result.user };
     } catch (error) {
       return { success: false, error: error.message };
@@ -92,6 +122,10 @@ export const AuthProvider = ({ children }) => {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       saveAccountToStorage(result.user);
+      
+      // Obtener token después del login exitoso
+      await updateFirebaseToken(result.user);
+      
       return { success: true, user: result.user };
     } catch (error) {
       return { success: false, error: error.message };
@@ -140,6 +174,10 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
+      // Limpiar token antes de cerrar sesión
+      setToken(null);
+      localStorage.removeItem('firebaseToken');
+      
       await signOut(auth);
       return { success: true };
     } catch (error) {
@@ -153,28 +191,65 @@ export const AuthProvider = ({ children }) => {
     return savedAccounts.filter(account => account.uid !== user.uid);
   };
 
+  // Función para refrescar el token (útil si expira)
+  const refreshToken = async () => {
+    if (auth.currentUser) {
+      return await updateFirebaseToken(auth.currentUser);
+    }
+    return null;
+  };
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      console.log('🔄 Auth state changed:', firebaseUser ? 'User logged in' : 'User logged out');
+      
+      if (firebaseUser) {
         // Actualizar información de la cuenta cuando el usuario cambia
-        saveAccountToStorage(user);
+        saveAccountToStorage(firebaseUser);
+        
+        // Obtener y guardar el token
+        await updateFirebaseToken(firebaseUser);
+      } else {
+        // Limpiar token si no hay usuario
+        await updateFirebaseToken(null);
       }
-      setUser(user);
+      
+      setUser(firebaseUser);
       setLoading(false);
     });
 
     return unsubscribe;
   }, []);
 
+  // Configurar refresh automático del token cada 50 minutos (antes de que expire)
+  useEffect(() => {
+    let tokenRefreshInterval;
+
+    if (user) {
+      tokenRefreshInterval = setInterval(async () => {
+        console.log('🔄 Refreshing Firebase token...');
+        await refreshToken();
+      }, 50 * 60 * 1000); // 50 minutos
+    }
+
+    return () => {
+      if (tokenRefreshInterval) {
+        clearInterval(tokenRefreshInterval);
+      }
+    };
+  }, [user]);
+
   const value = {
     user,
+    token, // Exponer el token para uso directo si es necesario
     loading,
     savedAccounts: getFilteredSavedAccounts(),
     login,
     loginWithGoogle,
     logout,
     switchAccount,
-    removeAccount
+    removeAccount,
+    refreshToken // Función para refrescar token manualmente
   };
 
   return (

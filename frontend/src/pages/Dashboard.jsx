@@ -13,6 +13,7 @@ const Dashboard = () => {
     fetchRecentPatients();
   }, [location.pathname]); // Se ejecuta al montar Y cuando cambia la ruta
 
+  
   /**
    * Obtiene y ordena los pacientes por actividad reciente
    * Considera tanto la fecha de creación/actualización del paciente
