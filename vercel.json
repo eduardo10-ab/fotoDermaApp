@@ -9,13 +9,18 @@
   ],
   "routes": [
     {
+      "src": "/health",
+      "dest": "backend/server.js"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "backend/server.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "backend/server.js"
     }
   ],
-  "env": {
-    "NODE_ENV": "production"
-  },
   "functions": {
     "backend/server.js": {
       "maxDuration": 30

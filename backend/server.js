@@ -119,5 +119,5 @@ if (require.main === module) {
   });
 }
 
-// IMPORTANTE: Exportar la app para Vercel
+// IMPORTANTE: Esta línea debe estar al final
 module.exports = app;

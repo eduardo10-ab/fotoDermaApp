@@ -1,5 +1,13 @@
 {
+  "name": "fotoderma-app",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "echo 'No build step required'",
+    "start": "node backend/server.js"
+  },
+
   "dependencies": {
     "firebase": "^12.1.0"
   }
 }
+
