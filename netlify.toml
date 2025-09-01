@@ -1,11 +1,13 @@
 [build]
-  base = "frontend"
+  # Remover "base = frontend" si tus archivos están en la raíz
   command = "npm run build"
   publish = "build"
 
 [build.environment]
   NODE_VERSION = "18"
   CI = "false"
+
+  REACT_APP_API_BASE_URL = "https://foto-derma-app-backend.vercel.app/api"
 
 # Redirects para React Router
 [[redirects]]
@@ -21,6 +23,8 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    # Permitir CORS para tu backend
+    Access-Control-Allow-Origin = "https://foto-derma-app-backend.vercel.app/api"
 
 # Cache para assets estáticos
 [[headers]]

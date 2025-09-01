@@ -1,120 +1,177 @@
 import axios from 'axios';
 
-// Configurar base URL de la API
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://foto-derma-app-backend.vercel.app';
+// Configuración base de la API
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://foto-derma-app-backend.vercel.app/api';
 
-console.log('🔧 Environment:', process.env.NODE_ENV);
+// URL base del backend
+const BACKEND_BASE_URL = 'https://foto-derma-app-backend.vercel.app';
+
 console.log('🌐 API Base URL:', API_BASE_URL);
-console.log('📋 Available env vars:', Object.keys(process.env).filter(key => key.startsWith('REACT_APP')));
+console.log('🌐 Backend Base URL:', BACKEND_BASE_URL);
 
-// Crear instancia de axios
+// Crear instancia de axios con configuración por defecto
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000, // Aumentado a 30 segundos para Vercel
+  timeout: 30000, // 30 segundos
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Interceptor para agregar token de autenticación automáticamente
+// Función para obtener el token actual
+const getAuthToken = () => {
+  const token = localStorage.getItem('firebaseToken');
+  return token;
+};
+
+// Interceptor para agregar el token de Firebase a todas las peticiones
 api.interceptors.request.use(
   (config) => {
-    // Obtener token del localStorage (o donde lo guardes)
-    const token = localStorage.getItem('firebaseToken') || localStorage.getItem('authToken');
+    const token = getAuthToken();
     
     if (token) {
+      // Asegurarse de que el formato del header sea correcto
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('🔑 Token agregado a la petición');
+    } else {
+      console.warn('⚠️ No hay token disponible');
     }
     
-    console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
-    if (token) {
-      console.log('🔑 Token included in request');
-    } else {
-      console.log('⚠️ No token found for request');
-    }
+    console.log(`📤 ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+    console.log('Headers:', config.headers);
     
     return config;
   },
   (error) => {
-    console.error('❌ API Request Error:', error);
+    console.error('❌ Request interceptor error:', error);
     return Promise.reject(error);
   }
 );
 
+// Interceptor para manejar respuestas y errores
 api.interceptors.response.use(
   (response) => {
-    console.log(`✅ API Response: ${response.status} - ${response.config.url}`);
+    console.log(`📥 ${response.status} ${response.config.url}`, response.data);
     return response;
   },
-  (error) => {
-    console.error('❌ API Response Error:', error.response?.status, error.message);
-    
-    // Si es 401, limpiar token y redirigir a login
+  async (error) => {
+    console.error('❌ API Error:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
+
+    // Manejar errores específicos
     if (error.response?.status === 401) {
-      console.log('🚫 Unauthorized - clearing token');
-      localStorage.removeItem('firebaseToken');
-      localStorage.removeItem('authToken');
-      // Opcional: redirigir a login
-      // window.location.href = '/login';
+      console.log('🔒 Token inválido o expirado');
+      
+      // Intentar refrescar el token si es posible
+      const { auth } = await import('../services/firebase');
+      if (auth.currentUser) {
+        try {
+          console.log('🔄 Intentando refrescar token...');
+          const newToken = await auth.currentUser.getIdToken(true); // Force refresh
+          localStorage.setItem('firebaseToken', newToken);
+          
+          // Reintentar la petición original con el nuevo token
+          error.config.headers.Authorization = `Bearer ${newToken}`;
+          return api.request(error.config);
+        } catch (refreshError) {
+          console.error('❌ Error refrescando token:', refreshError);
+          // Si no se puede refrescar, limpiar y redirigir
+          localStorage.removeItem('firebaseToken');
+          window.location.href = '/login';
+        }
+      } else {
+        // No hay usuario, redirigir a login
+        localStorage.removeItem('firebaseToken');
+        window.location.href = '/login';
+      }
     }
-    
+
     return Promise.reject(error);
   }
 );
 
-// Test de conectividad
-export const testConnection = async () => {
+// Funciones específicas para diferentes endpoints
+export const apiService = {
+  // Test de conectividad (sin auth)
+  testConnection: () => {
+    return axios.get(`${BACKEND_BASE_URL}/health`, {
+      timeout: 10000
+    });
+  },
+
+  // Pacientes (requieren auth)
+  getPatients: () => api.get('/patients'),
+  getPatient: (id) => api.get(`/patients/${id}`),
+  createPatient: (data) => api.post('/patients', data),
+  updatePatient: (id, data) => api.put(`/patients/${id}`, data),
+  deletePatient: (id) => api.delete(`/patients/${id}`),
+  searchPatients: (query) => api.get(`/patients/search?q=${encodeURIComponent(query)}`),
+
+  // Consultas (requieren auth)
+  getConsultationsByPatient: (patientId) => api.get(`/consultations/patient/${patientId}`),
+  getConsultation: (id) => api.get(`/consultations/${id}`),
+  createConsultation: (data) => api.post('/consultations', data),
+  createFollowUpConsultation: (data) => api.post('/consultations/followup', data),
+  updateConsultation: (id, data) => api.put(`/consultations/${id}`, data),
+  deleteConsultation: (id) => api.delete(`/consultations/${id}`),
+  uploadConsultationPhotos: (id, formData) => api.post(`/consultations/${id}/photos`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+
+  // Auth endpoints
+  verifyToken: () => api.post('/auth/verify'), // POST según tu ruta
+  getCurrentUser: () => api.get('/auth/me'),
+  updateUserProfile: (data) => api.put('/auth/profile', data),
+};
+
+// Función para probar la conectividad del backend
+export const testBackendConnection = async () => {
   try {
-    const response = await api.get('/api/health'); // Agregado /api/
-    console.log('Backend connection successful:', response.data);
-    return true;
+    console.log('🔍 Probando conexión con el backend...');
+    const response = await apiService.testConnection();
+    console.log('✅ Backend conectado correctamente:', response.data);
+    return { success: true, data: response.data };
   } catch (error) {
-    console.error('Backend connection failed:', error.message);
-    return false;
+    console.error('❌ Error conectando con el backend:', error);
+    return { 
+      success: false, 
+      error: error.response?.data || error.message,
+      status: error.response?.status 
+    };
   }
 };
 
-// Patients API - TODAS las rutas con prefijo /api/
-export const patientsAPI = {
-  getAll: () => api.get('/api/patients'),
-  getById: (id) => api.get(`/api/patients/${id}`),
-  create: (patientData) => api.post('/api/patients', patientData),
-  update: (id, patientData) => api.put(`/api/patients/${id}`, patientData),
-  delete: (id) => api.delete(`/api/patients/${id}`),
-  search: (query) => api.get(`/api/patients/search?q=${encodeURIComponent(query)}`),
-};
-
-// Consultations API - TODAS las rutas con prefijo /api/
-export const consultationsAPI = {
-  getAll: () => api.get('/api/consultations'),
-  getById: (id) => api.get(`/api/consultations/${id}`),
-  getByPatientId: (patientId) => api.get(`/api/consultations/patient/${patientId}`),
-  create: (consultationData) => api.post('/api/consultations', consultationData),  
-  createFollowUp: (followUpData) => api.post('/api/consultations/followup', followUpData),
-  update: (id, consultationData) => api.put(`/api/consultations/${id}`, consultationData),
-  delete: (id) => api.delete(`/api/consultations/${id}`),
-  uploadPhoto: (consultationId, formData) => 
-    api.post(`/api/consultations/${consultationId}/photos`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      timeout: 60000, // 60 segundos para uploads
-    }),
+// Función para probar la autenticación
+export const testAuthentication = async () => {
+  try {
+    console.log('🔍 Probando autenticación...');
+    const token = getAuthToken();
     
-  getConsultationsWithFollowUps: (patientId) => 
-    api.get(`/api/consultations/patient/${patientId}/with-followups`),
-};
+    if (!token) {
+      return { 
+        success: false, 
+        error: 'No hay token disponible' 
+      };
+    }
 
-// Auth API - TODAS las rutas con prefijo /api/
-export const authAPI = {
-  verifyToken: (token) => api.post('/api/auth/verify', { token }),
-  getCurrentUser: () => api.get('/api/auth/me'),
-  updateProfile: (profileData) => api.put('/api/auth/profile', profileData),
-};
-
-// Health check del backend
-export const healthAPI = {
-  check: () => api.get('/api/health')
+    const response = await apiService.verifyToken();
+    console.log('✅ Token válido:', response.data);
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error('❌ Error de autenticación:', error);
+    return { 
+      success: false, 
+      error: error.response?.data || error.message,
+      status: error.response?.status 
+    };
+  }
 };
 
 export default api;

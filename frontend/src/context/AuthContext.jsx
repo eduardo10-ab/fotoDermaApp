@@ -7,6 +7,7 @@ import {
   signOut,
   onAuthStateChanged 
 } from 'firebase/auth';
+import { testBackendConnection } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -22,7 +23,22 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [savedAccounts, setSavedAccounts] = useState([]);
-  const [token, setToken] = useState(null); // Nuevo estado para el token
+  const [token, setToken] = useState(null);
+  const [backendStatus, setBackendStatus] = useState(null);
+
+  // Probar conexión con el backend al inicializar
+  useEffect(() => {
+    const checkBackendConnection = async () => {
+      const result = await testBackendConnection();
+      setBackendStatus(result);
+      
+      if (!result.success) {
+        console.warn('⚠️ Backend no disponible:', result.error);
+      }
+    };
+
+    checkBackendConnection();
+  }, []);
 
   // Cargar cuentas guardadas del localStorage
   useEffect(() => {
@@ -241,15 +257,16 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
-    token, // Exponer el token para uso directo si es necesario
+    token,
     loading,
     savedAccounts: getFilteredSavedAccounts(),
+    backendStatus,
     login,
     loginWithGoogle,
     logout,
     switchAccount,
     removeAccount,
-    refreshToken // Función para refrescar token manualmente
+    refreshToken
   };
 
   return (
