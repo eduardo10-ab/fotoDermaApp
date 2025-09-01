@@ -29,34 +29,34 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // CORS configuration - ACTUALIZADO
+// CORS configuration - CORREGIDO (una sola configuración)
 const corsOptions = {
-  origin: function (origin, callback) {
-    // Permitir requests sin origin (aplicaciones móviles, Postman, etc.)
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'https://fotodermaapp.netlify.app', // Tu URL real de Netlify
-      process.env.FRONTEND_URL
-    ].filter(Boolean);
-    
-    console.log('🌐 CORS Check - Origin:', origin);
-    console.log('🔑 Allowed Origins:', allowedOrigins);
-    
-    if (allowedOrigins.includes(origin)) {
-      console.log('✅ CORS - Origin allowed');
-      callback(null, true);
-    } else {
-      console.log('❌ CORS - Origin not allowed');
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173', 
+    'https://fotodermaapp.netlify.app',
+    process.env.FRONTEND_URL
+  ].filter(Boolean),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   optionsSuccessStatus: 200
 };
+
+app.use(cors(corsOptions));
+
+// Middleware adicional para logging y manejo de preflight
+app.use((req, res, next) => {
+  console.log(`🔥 ${req.method} ${req.path} - Origin: ${req.headers.origin || 'none'}`);
+  
+  if (req.method === 'OPTIONS') {
+    console.log('✈️ Preflight request handled');
+    res.status(200).end();
+    return;
+  }
+  
+  next();
+});
 app.use(cors(corsOptions));
 
 const cors = require('cors');
