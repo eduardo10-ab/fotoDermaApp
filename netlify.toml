@@ -7,7 +7,6 @@
   NODE_VERSION = "18"
   CI = "false"
 
-  REACT_APP_API_BASE_URL = "https://foto-derma-app-backend.vercel.app/api"
 
 # Redirects para React Router
 [[redirects]]
