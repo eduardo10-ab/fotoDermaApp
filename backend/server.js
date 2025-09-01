@@ -30,20 +30,27 @@ app.use('/api/', limiter);
 
 // CORS configuration - ACTUALIZADO
 // CORS configuration - CORREGIDO (una sola configuración)
+// CORS configuration - SIMPLIFICADO
 const corsOptions = {
   origin: [
     'http://localhost:3000',
-    'http://localhost:5173', 
+    'http://localhost:5173',
     'https://fotodermaapp.netlify.app',
     process.env.FRONTEND_URL
   ].filter(Boolean),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  optionsSuccessStatus: 200
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 };
 
 app.use(cors(corsOptions));
+
+// Logging middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
+
 
 // Middleware adicional para logging y manejo de preflight
 app.use((req, res, next) => {
