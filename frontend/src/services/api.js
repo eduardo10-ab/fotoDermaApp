@@ -1,16 +1,16 @@
 import axios from 'axios';
 import { auth } from './firebase';
 
-// Configuración dinámica de la URL base para Vite
+// Configuración dinámica de la URL base para React
 const getApiBaseUrl = () => {
   // Prioridad: Variable de entorno > URL de producción > Desarrollo local
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
   }
   
-  if (import.meta.env.MODE === 'production') {
-    // CAMBIAR por tu URL de Vercel cuando la tengas
-    return 'https://tu-app-backend.vercel.app/api';
+  if (process.env.NODE_ENV === 'production') {
+    // URL de tu backend en Vercel
+    return 'https://foto-derma-app-backend.vercel.app/api';
   }
   
   return 'http://localhost:3001/api';
@@ -19,6 +19,7 @@ const getApiBaseUrl = () => {
 const API_BASE_URL = getApiBaseUrl();
 
 console.log('API Base URL:', API_BASE_URL); // Para debug
+console.log('Environment:', process.env.NODE_ENV); // Para debug
 
 // Create axios instance
 const api = axios.create({
