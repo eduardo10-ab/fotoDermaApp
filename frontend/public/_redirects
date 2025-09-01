@@ -1,0 +1,6 @@
+# Netlify SPA redirect rule
+/* /index.html 200
+
+# Optional: Force HTTPS
+http://fotodermaapp.netlify.app/* https://fotodermaapp.netlify.app/:splat 301!
+http://www.fotodermaapp.netlify.app/* https://fotodermaapp.netlify.app/:splat 301!
