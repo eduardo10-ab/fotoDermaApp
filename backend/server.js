@@ -29,21 +29,55 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // CORS configuration - ACTUALIZADO con variables existentes
+// En server.js - actualizar la configuración CORS
+
+// CORS configuration - ACTUALIZADO
 const corsOptions = {
-  origin: [
-    'http://localhost:3000', // desarrollo local con Vite
-    'http://localhost:5173', // puerto por defecto de Vite dev server
-    process.env.FRONTEND_URL, // URL de Netlify desde variable de entorno
-    // Agrega aquí tu URL de Netlify cuando la tengas
-    // 'https://fotoderma-app.netlify.app'
-  ].filter(Boolean), // filtra valores undefined
+  origin: function (origin, callback) {
+    // Permitir requests sin origin (aplicaciones móviles, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'https://fotodermaapp.netlify.app', // Tu URL real de Netlify
+      process.env.FRONTEND_URL
+    ].filter(Boolean);
+    
+    console.log('🌐 CORS Check - Origin:', origin);
+    console.log('🔑 Allowed Origins:', allowedOrigins);
+    
+    if (allowedOrigins.includes(origin)) {
+      console.log('✅ CORS - Origin allowed');
+      callback(null, true);
+    } else {
+      console.log('❌ CORS - Origin not allowed');
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
+
+// Middleware adicional para manejar preflight requests
+app.use((req, res, next) => {
+  console.log(`📥 ${req.method} ${req.path} - Origin: ${req.headers.origin || 'none'}`);
+  
+  // Headers adicionales para CORS
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  if (req.method === 'OPTIONS') {
+    console.log('✈️ Preflight request handled');
+    res.status(200).end();
+    return;
+  }
+  
+  next();
+});
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));

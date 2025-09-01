@@ -1,73 +1,41 @@
 import axios from 'axios';
 import { auth } from './firebase';
 
-// Configuración dinámica de la URL base para React
-const getApiBaseUrl = () => {
-  // Prioridad: Variable de entorno > URL de producción > Desarrollo local
-  if (process.env.REACT_APP_API_URL) {
-    return process.env.REACT_APP_API_URL;
-  }
-  
-  if (process.env.NODE_ENV === 'production') {
-    // URL de tu backend en Vercel
-    return 'https://foto-derma-app-backend.vercel.app/api';
-  }
-  
-  return 'http://localhost:3001/api';
-};
+// Configurar base URL de la API
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://foto-derma-app-backend.vercel.app';
 
-const API_BASE_URL = getApiBaseUrl();
+console.log('🔧 Environment:', process.env.NODE_ENV);
+console.log('🌐 API Base URL:', API_BASE_URL);
+console.log('📋 Available env vars:', Object.keys(process.env).filter(key => key.startsWith('REACT_APP')));
 
-console.log('API Base URL:', API_BASE_URL); // Para debug
-console.log('Environment:', process.env.NODE_ENV); // Para debug
-
-// Create axios instance
+// Crear instancia de axios
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000, // 30 segundos timeout
+  timeout: 10000, // 10 segundos timeout
   headers: {
-    'Content-Type': 'application/json'
-  }
+    'Content-Type': 'application/json',
+  },
 });
 
-// Add auth interceptor
+// Interceptor para logging (útil para debug)
 api.interceptors.request.use(
-  async (config) => {
-    try {
-      const user = auth.currentUser;
-      if (user) {
-        const token = await user.getIdToken();
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    } catch (error) {
-      console.error('Error getting auth token:', error);
-    }
+  (config) => {
+    console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
     return config;
   },
   (error) => {
+    console.error('❌ API Request Error:', error);
     return Promise.reject(error);
   }
 );
 
-// Response interceptor para manejar errores globalmente
 api.interceptors.response.use(
   (response) => {
+    console.log(`✅ API Response: ${response.status} - ${response.config.url}`);
     return response;
   },
   (error) => {
-    // Log de errores para debugging
-    console.error('API Error:', {
-      message: error.message,
-      status: error.response?.status,
-      data: error.response?.data,
-      url: error.config?.url
-    });
-
-    // Manejo específico de errores de red
-    if (!error.response) {
-      console.error('Network Error - El backend puede no estar disponible');
-    }
-
+    console.error('❌ API Response Error:', error.response?.status, error.message);
     return Promise.reject(error);
   }
 );
@@ -99,14 +67,11 @@ export const consultationsAPI = {
   getAll: () => api.get('/consultations'),
   getById: (id) => api.get(`/consultations/${id}`),
   getByPatientId: (patientId) => api.get(`/consultations/patient/${patientId}`),
-  create: (consultationData) => api.post('/consultations', consultationData),
-  
+  create: (consultationData) => api.post('/consultations', consultationData),  
   // Función actualizada: createFollowUp ahora usa el endpoint correcto
   createFollowUp: (followUpData) => api.post('/consultations/followup', followUpData),
-  
   update: (id, consultationData) => api.put(`/consultations/${id}`, consultationData),
   delete: (id) => api.delete(`/consultations/${id}`),
-  
   uploadPhoto: (consultationId, formData) => 
     api.post(`/consultations/${consultationId}/photos`, formData, {
       headers: {
