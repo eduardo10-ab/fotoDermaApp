@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import PatientCard from '../components/PatientCard';
-import { patientsAPI, consultationsAPI  } from '../services/api';
+import { patientsAPI, consultationsAPI } from '../services/api';
 
 const Dashboard = () => {
   const [recentPatients, setRecentPatients] = useState([]);
@@ -23,8 +23,8 @@ const Dashboard = () => {
     try {
       setLoading(true);
       
-      // Obtener todos los pacientes desde la API
-      const response = await patientsAPI.getAll();
+      // ✅ CORREGIDO: Usar getPatients() en lugar de getAll()
+      const response = await patientsAPI.getPatients();
       
       const patients = Array.isArray(response.data) 
         ? response.data 
@@ -41,8 +41,8 @@ const Dashboard = () => {
       const patientsWithActivity = await Promise.all(
         patients.map(async (patient) => {
           try {
-            // Obtener las consultas del paciente
-            const consultationsResponse = await consultationsAPI.getByPatientId(patient.id);
+            // ✅ CORREGIDO: Usar getConsultationsByPatient() en lugar de getByPatientId()
+            const consultationsResponse = await consultationsAPI.getConsultationsByPatient(patient.id);
             const consultations = Array.isArray(consultationsResponse.data) 
               ? consultationsResponse.data 
               : consultationsResponse.data?.data || [];

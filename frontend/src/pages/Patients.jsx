@@ -51,7 +51,7 @@ const Patients = () => {
       setLoading(true);
       
       // Llamada a la API para obtener todos los pacientes
-      const response = await patientsAPI.getAll();
+      const response = await patientsAPI.getPatients();  // ✅ Este sí existe
       
       // Normalizar la respuesta (manejar diferentes estructuras de datos)
       const patients = Array.isArray(response.data) 
