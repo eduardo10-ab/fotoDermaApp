@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// CORRECCIÓN: Configuración base SIN /api al final
+// CONFIGURACIÓN CORREGIDA - SIN /api en las llamadas
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://foto-derma-app-backend.vercel.app';
 
 console.log('🌐 API Base URL:', API_BASE_URL);
@@ -31,7 +31,7 @@ api.interceptors.request.use(
     
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('🔑 Token agregado a request');
+      console.log('🔐 Token agregado a request');
     } else {
       console.warn('⚠️ Request sin token de autorización');
     }
@@ -59,17 +59,15 @@ api.interceptors.response.use(
     const fullURL = error.config ? `${error.config.baseURL}${error.config.url}` : 'URL desconocida';
     
     console.error('❌ API Error:', {
-      url: fullURL,
-      method: error.config?.method?.toUpperCase(),
+      message: error.message,
       status: error.response?.status,
-      statusText: error.response?.statusText,
       data: error.response?.data,
-      message: error.message
+      url: fullURL,
     });
 
     // Manejar errores 401 - Token inválido
     if (error.response?.status === 401) {
-      console.log('🔒 Token inválido o expirado');
+      console.log('🔐 Token inválido o expirado');
       
       // Intentar refrescar el token si es posible
       try {
@@ -100,7 +98,7 @@ api.interceptors.response.use(
 
 // Funciones específicas para diferentes endpoints
 export const apiService = {
-  // Test de conectividad (sin auth) - CORREGIDO
+  // Test de conectividad (sin auth)
   testConnection: () => {
     console.log('🔍 Testing connection to:', `${API_BASE_URL}/health`);
     return axios.get(`${API_BASE_URL}/health`, {
@@ -108,7 +106,7 @@ export const apiService = {
     });
   },
 
-  // Pacientes (requieren auth) - RUTAS CORREGIDAS CON /api
+  // Pacientes (requieren auth) - RUTAS CORREGIDAS (el servidor ya agrega /api)
   getPatients: () => {
     console.log('🏥 Obteniendo pacientes...');
     return api.get('/api/patients');
@@ -134,7 +132,7 @@ export const apiService = {
     return api.get(`/api/patients/search?q=${encodeURIComponent(query)}`);
   },
 
-  // Consultas (requieren auth) - RUTAS CORREGIDAS CON /api
+  // Consultas (requieren auth) - RUTAS CORREGIDAS
   getConsultationsByPatient: (patientId) => {
     console.log('📋 Obteniendo consultas del paciente:', patientId);
     return api.get(`/api/consultations/patient/${patientId}`);
@@ -168,9 +166,9 @@ export const apiService = {
     });
   },
 
-  // Auth endpoints - RUTAS CORREGIDAS CON /api
+  // Auth endpoints - RUTAS CORREGIDAS
   verifyToken: () => {
-    console.log('🔐 Verificando token...');
+    console.log('🔍 Verificando token...');
     return api.post('/api/auth/verify');
   },
   getCurrentUser: () => {
