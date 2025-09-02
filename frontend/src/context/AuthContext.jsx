@@ -40,6 +40,15 @@ export const AuthProvider = ({ children }) => {
     checkBackendConnection();
   }, []);
 
+  // Cargar token del localStorage al inicializar
+  useEffect(() => {
+    const savedToken = localStorage.getItem('firebaseToken');
+    if (savedToken) {
+      setToken(savedToken);
+      console.log('🔑 Token cargado del localStorage');
+    }
+  }, []);
+
   // Cargar cuentas guardadas del localStorage
   useEffect(() => {
     const loadSavedAccounts = () => {
@@ -63,12 +72,16 @@ export const AuthProvider = ({ children }) => {
     if (firebaseUser) {
       try {
         console.log('🔑 Obteniendo token de Firebase...');
-        const idToken = await firebaseUser.getIdToken();
-        console.log('✅ Token obtenido exitosamente');
+        const idToken = await firebaseUser.getIdToken(true); // force refresh
+        console.log('✅ Token obtenido exitosamente:', idToken ? 'Token válido' : 'Token vacío');
         
         // Guardar token en estado y localStorage
         setToken(idToken);
         localStorage.setItem('firebaseToken', idToken);
+        
+        // IMPORTANTE: Verificar que se guardó correctamente
+        const savedToken = localStorage.getItem('firebaseToken');
+        console.log('🔍 Verificación - Token guardado:', savedToken ? 'SÍ' : 'NO');
         
         return idToken;
       } catch (error) {
@@ -77,6 +90,7 @@ export const AuthProvider = ({ children }) => {
       }
     } else {
       // Limpiar token si no hay usuario
+      console.log('🗑️ Limpiando token - usuario deslogueado');
       setToken(null);
       localStorage.removeItem('firebaseToken');
       return null;
@@ -121,50 +135,61 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      setLoading(true);
       const result = await signInWithEmailAndPassword(auth, email, password);
       saveAccountToStorage(result.user);
       
       // Obtener token después del login exitoso
-      await updateFirebaseToken(result.user);
+      const token = await updateFirebaseToken(result.user);
+      console.log('🔑 Login exitoso - Token obtenido:', token ? 'SÍ' : 'NO');
       
       return { success: true, user: result.user };
     } catch (error) {
+      console.error('❌ Error en login:', error);
       return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
     }
   };
 
   const loginWithGoogle = async () => {
     try {
+      setLoading(true);
       const provider = new GoogleAuthProvider();
+      // Agregar configuración adicional para popup
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
+      
       const result = await signInWithPopup(auth, provider);
+      console.log('🟢 Google login result:', result.user ? 'Usuario obtenido' : 'No user');
+      
       saveAccountToStorage(result.user);
       
       // Obtener token después del login exitoso
-      await updateFirebaseToken(result.user);
+      const token = await updateFirebaseToken(result.user);
+      console.log('🔑 Google login exitoso - Token obtenido:', token ? 'SÍ' : 'NO');
       
       return { success: true, user: result.user };
     } catch (error) {
+      console.error('❌ Error en Google login:', error);
       return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
     }
   };
 
   // Cambiar a otra cuenta guardada
   const switchAccount = async (accountData) => {
     try {
-      // Si es la misma cuenta actual, no hacer nada
       if (user && user.uid === accountData.uid) {
         return { success: true, message: 'Ya estás usando esta cuenta' };
       }
 
       console.log('Cambiando a cuenta:', accountData.email);
-
-      // Cerrar sesión actual
       await signOut(auth);
-
-      // Simular un delay para mejor UX
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Redirigir al login con parámetros para autologin
       const loginUrl = `/login?switch_account=${encodeURIComponent(accountData.email)}&uid=${accountData.uid}`;
       window.location.href = loginUrl;
       
@@ -191,6 +216,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       // Limpiar token antes de cerrar sesión
+      console.log('🚪 Cerrando sesión - limpiando token');
       setToken(null);
       localStorage.removeItem('firebaseToken');
       
@@ -207,25 +233,31 @@ export const AuthProvider = ({ children }) => {
     return savedAccounts.filter(account => account.uid !== user.uid);
   };
 
-  // Función para refrescar el token (útil si expira)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Función para refrescar el token
   const refreshToken = async () => {
-      if (auth.currentUser) {
-        return await updateFirebaseToken(auth.currentUser);
-      }
-      return null;
-    };
+    if (auth.currentUser) {
+      console.log('🔄 Refrescando token...');
+      return await updateFirebaseToken(auth.currentUser);
+    }
+    return null;
+  };
 
+  // Listener principal de autenticación
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      console.log('🔄 Auth state changed:', firebaseUser ? 'User logged in' : 'User logged out');
+      console.log('🔄 Auth state changed:', firebaseUser ? `Usuario: ${firebaseUser.email}` : 'Usuario deslogueado');
       
       if (firebaseUser) {
-        // Actualizar información de la cuenta cuando el usuario cambia
+        // Guardar información de la cuenta
         saveAccountToStorage(firebaseUser);
         
-        // Obtener y guardar el token
-        await updateFirebaseToken(firebaseUser);
+        // Obtener y guardar el token - CRÍTICO
+        const token = await updateFirebaseToken(firebaseUser);
+        if (token) {
+          console.log('✅ Token actualizado correctamente en auth state change');
+        } else {
+          console.error('❌ No se pudo obtener el token en auth state change');
+        }
       } else {
         // Limpiar token si no hay usuario
         await updateFirebaseToken(null);
@@ -238,13 +270,13 @@ export const AuthProvider = ({ children }) => {
     return unsubscribe;
   }, []);
 
-  // Configurar refresh automático del token cada 50 minutos (antes de que expire)
+  // Configurar refresh automático del token cada 50 minutos
   useEffect(() => {
     let tokenRefreshInterval;
 
-    if (user) {
+    if (user && token) {
       tokenRefreshInterval = setInterval(async () => {
-        console.log('🔄 Refreshing Firebase token...');
+        console.log('🔄 Auto-refreshing Firebase token...');
         await refreshToken();
       }, 50 * 60 * 1000); // 50 minutos
     }
@@ -254,7 +286,16 @@ export const AuthProvider = ({ children }) => {
         clearInterval(tokenRefreshInterval);
       }
     };
-  }, [user, refreshToken]);
+  }, [user, token]);
+
+  // Debug: Mostrar estado del token
+  useEffect(() => {
+    console.log('🔍 Token state update:', {
+      hasToken: !!token,
+      tokenLength: token ? token.length : 0,
+      localStorage: !!localStorage.getItem('firebaseToken')
+    });
+  }, [token]);
 
   const value = {
     user,

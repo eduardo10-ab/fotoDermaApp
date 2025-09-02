@@ -1,9 +1,10 @@
 import axios from 'axios';
 
-// Configuración base de la API
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://foto-derma-app-backend.vercel.app/api';
+// CORRECCIÓN: Configuración base SIN /api al final
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://foto-derma-app-backend.vercel.app';
 
 console.log('🌐 API Base URL:', API_BASE_URL);
+console.log('📊 Environment:', process.env.NODE_ENV);
 
 // Crear instancia de axios con configuración por defecto
 const api = axios.create({
@@ -17,6 +18,9 @@ const api = axios.create({
 // Función para obtener el token actual
 const getAuthToken = () => {
   const token = localStorage.getItem('firebaseToken');
+  if (!token) {
+    console.warn('⚠️ No se encontró token en localStorage');
+  }
   return token;
 };
 
@@ -27,9 +31,14 @@ api.interceptors.request.use(
     
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('🔑 Token agregado a request');
+    } else {
+      console.warn('⚠️ Request sin token de autorización');
     }
     
-    console.log(`📤 ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+    // Log detallado de la request
+    const fullURL = `${config.baseURL}${config.url}`;
+    console.log(`📤 ${config.method?.toUpperCase()} ${fullURL}`);
     
     return config;
   },
@@ -42,19 +51,23 @@ api.interceptors.request.use(
 // Interceptor para manejar respuestas y errores
 api.interceptors.response.use(
   (response) => {
-    console.log(`📥 ${response.status} ${response.config.url}`);
+    const fullURL = `${response.config.baseURL}${response.config.url}`;
+    console.log(`📥 ${response.status} ${fullURL}`);
     return response;
   },
   async (error) => {
+    const fullURL = error.config ? `${error.config.baseURL}${error.config.url}` : 'URL desconocida';
+    
     console.error('❌ API Error:', {
-      url: error.config?.url,
-      method: error.config?.method,
+      url: fullURL,
+      method: error.config?.method?.toUpperCase(),
       status: error.response?.status,
+      statusText: error.response?.statusText,
       data: error.response?.data,
       message: error.message
     });
 
-    // Manejar errores 401
+    // Manejar errores 401 - Token inválido
     if (error.response?.status === 401) {
       console.log('🔒 Token inválido o expirado');
       
@@ -65,6 +78,7 @@ api.interceptors.response.use(
           console.log('🔄 Intentando refrescar token...');
           const newToken = await auth.currentUser.getIdToken(true);
           localStorage.setItem('firebaseToken', newToken);
+          console.log('✅ Token refrescado, reintentando request...');
           
           // Reintentar la petición original con el nuevo token
           error.config.headers.Authorization = `Bearer ${newToken}`;
@@ -75,6 +89,7 @@ api.interceptors.response.use(
       }
       
       // Si no se puede refrescar, limpiar y redirigir
+      console.log('🚪 Redirigiendo al login...');
       localStorage.removeItem('firebaseToken');
       window.location.href = '/login';
     }
@@ -85,38 +100,87 @@ api.interceptors.response.use(
 
 // Funciones específicas para diferentes endpoints
 export const apiService = {
-  // Test de conectividad (sin auth)
+  // Test de conectividad (sin auth) - CORREGIDO
   testConnection: () => {
-    return axios.get('https://foto-derma-app-backend.vercel.app/health', {
+    console.log('🔍 Testing connection to:', `${API_BASE_URL}/health`);
+    return axios.get(`${API_BASE_URL}/health`, {
       timeout: 10000
     });
   },
 
-  // Pacientes (requieren auth)
-  getPatients: () => api.get('/patients'),
-  getPatient: (id) => api.get(`/patients/${id}`),
-  createPatient: (data) => api.post('/patients', data),
-  updatePatient: (id, data) => api.put(`/patients/${id}`, data),
-  deletePatient: (id) => api.delete(`/patients/${id}`),
-  searchPatients: (query) => api.get(`/patients/search?q=${encodeURIComponent(query)}`),
+  // Pacientes (requieren auth) - RUTAS CORREGIDAS CON /api
+  getPatients: () => {
+    console.log('🏥 Obteniendo pacientes...');
+    return api.get('/api/patients');
+  },
+  getPatient: (id) => {
+    console.log('🏥 Obteniendo paciente:', id);
+    return api.get(`/api/patients/${id}`);
+  },
+  createPatient: (data) => {
+    console.log('🏥 Creando paciente...');
+    return api.post('/api/patients', data);
+  },
+  updatePatient: (id, data) => {
+    console.log('🏥 Actualizando paciente:', id);
+    return api.put(`/api/patients/${id}`, data);
+  },
+  deletePatient: (id) => {
+    console.log('🏥 Eliminando paciente:', id);
+    return api.delete(`/api/patients/${id}`);
+  },
+  searchPatients: (query) => {
+    console.log('🔍 Buscando pacientes:', query);
+    return api.get(`/api/patients/search?q=${encodeURIComponent(query)}`);
+  },
 
-  // Consultas (requieren auth)
-  getConsultationsByPatient: (patientId) => api.get(`/consultations/patient/${patientId}`),
-  getConsultation: (id) => api.get(`/consultations/${id}`),
-  createConsultation: (data) => api.post('/consultations', data),
-  createFollowUpConsultation: (data) => api.post('/consultations/followup', data),
-  updateConsultation: (id, data) => api.put(`/consultations/${id}`, data),
-  deleteConsultation: (id) => api.delete(`/consultations/${id}`),
-  uploadConsultationPhotos: (id, formData) => api.post(`/consultations/${id}/photos`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  }),
+  // Consultas (requieren auth) - RUTAS CORREGIDAS CON /api
+  getConsultationsByPatient: (patientId) => {
+    console.log('📋 Obteniendo consultas del paciente:', patientId);
+    return api.get(`/api/consultations/patient/${patientId}`);
+  },
+  getConsultation: (id) => {
+    console.log('📋 Obteniendo consulta:', id);
+    return api.get(`/api/consultations/${id}`);
+  },
+  createConsultation: (data) => {
+    console.log('📋 Creando consulta...');
+    return api.post('/api/consultations', data);
+  },
+  createFollowUpConsultation: (data) => {
+    console.log('📋 Creando consulta de seguimiento...');
+    return api.post('/api/consultations/followup', data);
+  },
+  updateConsultation: (id, data) => {
+    console.log('📋 Actualizando consulta:', id);
+    return api.put(`/api/consultations/${id}`, data);
+  },
+  deleteConsultation: (id) => {
+    console.log('📋 Eliminando consulta:', id);
+    return api.delete(`/api/consultations/${id}`);
+  },
+  uploadConsultationPhotos: (id, formData) => {
+    console.log('📸 Subiendo fotos a consulta:', id);
+    return api.post(`/api/consultations/${id}/photos`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 
-  // Auth endpoints
-  verifyToken: () => api.post('/auth/verify'),
-  getCurrentUser: () => api.get('/auth/me'),
-  updateUserProfile: (data) => api.put('/auth/profile', data),
+  // Auth endpoints - RUTAS CORREGIDAS CON /api
+  verifyToken: () => {
+    console.log('🔐 Verificando token...');
+    return api.post('/api/auth/verify');
+  },
+  getCurrentUser: () => {
+    console.log('👤 Obteniendo usuario actual...');
+    return api.get('/api/auth/me');
+  },
+  updateUserProfile: (data) => {
+    console.log('👤 Actualizando perfil...');
+    return api.put('/api/auth/profile', data);
+  },
 };
 
 // Función para probar la conectividad del backend
@@ -127,7 +191,11 @@ export const testBackendConnection = async () => {
     console.log('✅ Backend conectado correctamente:', response.data);
     return { success: true, data: response.data };
   } catch (error) {
-    console.error('❌ Error conectando con el backend:', error);
+    console.error('❌ Error conectando con el backend:', {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data
+    });
     return { 
       success: false, 
       error: error.response?.data || error.message,
@@ -153,7 +221,11 @@ export const testAuthentication = async () => {
     console.log('✅ Token válido:', response.data);
     return { success: true, data: response.data };
   } catch (error) {
-    console.error('❌ Error de autenticación:', error);
+    console.error('❌ Error de autenticación:', {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data
+    });
     return { 
       success: false, 
       error: error.response?.data || error.message,
@@ -193,5 +265,5 @@ export const authAPI = {
   getCurrentUser: apiService.getCurrentUser,
   updateUserProfile: apiService.updateUserProfile,
 };
-//
+
 export default api;
