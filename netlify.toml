@@ -2,7 +2,7 @@
   # Especificar que el frontend está en la carpeta 'frontend'
   base = "frontend"
   command = "npm run build"
-  publish = "frontend/build"
+  publish = "build"
 
 [build.environment]
   NODE_VERSION = "18"
