@@ -1,9 +1,11 @@
 [build]
+  # Especificar que el frontend está en la carpeta 'frontend'
+  base = "frontend"
   command = "npm run build"
-  publish = "build"  # Esto ya estaba correcto
+  publish = "frontend/build"
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "18"
   CI = "false"
 
 # Redirects para React Router
@@ -20,7 +22,6 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    # Corregir el header CORS
     Access-Control-Allow-Origin = "*"
 
 # Cache para assets estáticos
