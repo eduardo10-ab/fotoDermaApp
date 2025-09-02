@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import PatientCard from '../components/PatientCard';
-import { patientsAPI, consultationsAPI } from '../services/api';
+import { patientsAPI, consultationsAPI  } from '../services/api';
 
 const Dashboard = () => {
   const [recentPatients, setRecentPatients] = useState([]);

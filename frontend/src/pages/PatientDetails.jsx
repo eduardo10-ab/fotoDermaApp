@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ChevronDown, Maximize2, User, Filter, X } from 'lucide-react';
 import ConsultationCard from '../components/ConsultationCard';
 import FollowUpModal from '../components/FollowUpModal';
-import { patientsAPI, consultationsAPI } from '../services/api';
+import { patientsAPI, consultationsAPI  } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import {ArrowLeft } from 'lucide-react';
 

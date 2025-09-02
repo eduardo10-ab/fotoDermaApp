@@ -162,4 +162,36 @@ export const testAuthentication = async () => {
   }
 };
 
+// ============================================
+// EXPORTACIONES COMPATIBLES PARA EL FRONTEND
+// ============================================
+
+// API específica para consultas
+export const consultationsAPI = {
+  getConsultationsByPatient: apiService.getConsultationsByPatient,
+  getConsultation: apiService.getConsultation,
+  createConsultation: apiService.createConsultation,
+  createFollowUpConsultation: apiService.createFollowUpConsultation,
+  updateConsultation: apiService.updateConsultation,
+  deleteConsultation: apiService.deleteConsultation,
+  uploadConsultationPhotos: apiService.uploadConsultationPhotos,
+};
+
+// API específica para pacientes
+export const patientsAPI = {
+  getPatients: apiService.getPatients,
+  getPatient: apiService.getPatient,
+  createPatient: apiService.createPatient,
+  updatePatient: apiService.updatePatient,
+  deletePatient: apiService.deletePatient,
+  searchPatients: apiService.searchPatients,
+};
+
+// API específica para autenticación
+export const authAPI = {
+  verifyToken: apiService.verifyToken,
+  getCurrentUser: apiService.getCurrentUser,
+  updateUserProfile: apiService.updateUserProfile,
+};
+
 export default api;

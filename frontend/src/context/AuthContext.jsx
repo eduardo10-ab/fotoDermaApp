@@ -208,12 +208,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Función para refrescar el token (útil si expira)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const refreshToken = async () => {
-    if (auth.currentUser) {
-      return await updateFirebaseToken(auth.currentUser);
-    }
-    return null;
-  };
+      if (auth.currentUser) {
+        return await updateFirebaseToken(auth.currentUser);
+      }
+      return null;
+    };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -253,7 +254,7 @@ export const AuthProvider = ({ children }) => {
         clearInterval(tokenRefreshInterval);
       }
     };
-  }, [user]);
+  }, [user, refreshToken]);
 
   const value = {
     user,
