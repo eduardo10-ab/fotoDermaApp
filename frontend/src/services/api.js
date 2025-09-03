@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// CONFIGURACIÓN CORREGIDA - SIN /api en las llamadas
+// CONFIGURACIÓN CORREGIDA - Base URL ya incluye /api
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://foto-derma-app-backend.vercel.app/api';
 
 console.log('🌐 API Base URL:', API_BASE_URL);
@@ -67,7 +67,7 @@ api.interceptors.response.use(
 
     // Manejar errores 401 - Token inválido
     if (error.response?.status === 401) {
-      console.log('🔐 Token inválido o expirado');
+      console.log('🔒 Token inválido o expirado');
       
       // Intentar refrescar el token si es posible
       try {
@@ -98,86 +98,87 @@ api.interceptors.response.use(
 
 // Funciones específicas para diferentes endpoints
 export const apiService = {
-  // Test de conectividad (sin auth)
+  // Test de conectividad - Usando ruta completa para health check
   testConnection: () => {
-    console.log('🔍 Testing connection to:', `${API_BASE_URL}/health`);
-    return axios.get(`${API_BASE_URL}/health`, {
+    const healthURL = API_BASE_URL.replace('/api', '/health');
+    console.log('🔍 Testing connection to:', healthURL);
+    return axios.get(healthURL, {
       timeout: 10000
     });
   },
 
-  // Pacientes (requieren auth) - RUTAS CORREGIDAS (el servidor ya agrega /api)
+  // Pacientes (requieren auth) - SIN /api adicional
   getPatients: () => {
     console.log('🏥 Obteniendo pacientes...');
-    return api.get('/api/patients');
+    return api.get('/patients'); // ✅ Correcto: /api/patients
   },
   getPatient: (id) => {
     console.log('🏥 Obteniendo paciente:', id);
-    return api.get(`/api/patients/${id}`);
+    return api.get(`/patients/${id}`); // ✅ Correcto
   },
   createPatient: (data) => {
     console.log('🏥 Creando paciente...');
-    return api.post('/api/patients', data);
+    return api.post('/patients', data); // ✅ Correcto
   },
   updatePatient: (id, data) => {
     console.log('🏥 Actualizando paciente:', id);
-    return api.put(`/api/patients/${id}`, data);
+    return api.put(`/patients/${id}`, data); // ✅ Correcto
   },
   deletePatient: (id) => {
     console.log('🏥 Eliminando paciente:', id);
-    return api.delete(`/api/patients/${id}`);
+    return api.delete(`/patients/${id}`); // ✅ Correcto
   },
   searchPatients: (query) => {
     console.log('🔍 Buscando pacientes:', query);
-    return api.get(`/api/patients/search?q=${encodeURIComponent(query)}`);
+    return api.get(`/patients/search?q=${encodeURIComponent(query)}`); // ✅ Correcto
   },
 
-  // Consultas (requieren auth) - RUTAS CORREGIDAS
+  // Consultas (requieren auth) - SIN /api adicional
   getConsultationsByPatient: (patientId) => {
     console.log('📋 Obteniendo consultas del paciente:', patientId);
-    return api.get(`/api/consultations/patient/${patientId}`);
+    return api.get(`/consultations/patient/${patientId}`); // ✅ Correcto
   },
   getConsultation: (id) => {
     console.log('📋 Obteniendo consulta:', id);
-    return api.get(`/api/consultations/${id}`);
+    return api.get(`/consultations/${id}`); // ✅ Correcto
   },
   createConsultation: (data) => {
     console.log('📋 Creando consulta...');
-    return api.post('/api/consultations', data);
+    return api.post('/consultations', data); // ✅ Correcto
   },
   createFollowUpConsultation: (data) => {
     console.log('📋 Creando consulta de seguimiento...');
-    return api.post('/api/consultations/followup', data);
+    return api.post('/consultations/followup', data); // ✅ Correcto
   },
   updateConsultation: (id, data) => {
     console.log('📋 Actualizando consulta:', id);
-    return api.put(`/api/consultations/${id}`, data);
+    return api.put(`/consultations/${id}`, data); // ✅ Correcto
   },
   deleteConsultation: (id) => {
     console.log('📋 Eliminando consulta:', id);
-    return api.delete(`/api/consultations/${id}`);
+    return api.delete(`/consultations/${id}`); // ✅ Correcto
   },
   uploadConsultationPhotos: (id, formData) => {
     console.log('📸 Subiendo fotos a consulta:', id);
-    return api.post(`/api/consultations/${id}/photos`, formData, {
+    return api.post(`/consultations/${id}/photos`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-    });
+    }); // ✅ Correcto
   },
 
-  // Auth endpoints - RUTAS CORREGIDAS
+  // Auth endpoints - SIN /api adicional
   verifyToken: () => {
     console.log('🔍 Verificando token...');
-    return api.post('/api/auth/verify');
+    return api.post('/auth/verify'); // ✅ Correcto: /api/auth/verify
   },
   getCurrentUser: () => {
     console.log('👤 Obteniendo usuario actual...');
-    return api.get('/api/auth/me');
+    return api.get('/auth/me'); // ✅ Correcto: /api/auth/me
   },
   updateUserProfile: (data) => {
     console.log('👤 Actualizando perfil...');
-    return api.put('/api/auth/profile', data);
+    return api.put('/auth/profile', data); // ✅ Correcto: /api/auth/profile
   },
 };
 
