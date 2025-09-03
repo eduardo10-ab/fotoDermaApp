@@ -3,22 +3,22 @@
   "name": "fotoderma-backend",
   "builds": [
     {
-      "src": "backend/package.json",
+      "src": "package.json",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/health",
-      "dest": "backend/server.js"
+      "dest": "/server.js"
     },
     {
       "src": "/api/(.*)",
-      "dest": "backend/server.js"
+      "dest": "/server.js"
     },
     {
       "src": "/(.*)",
-      "dest": "backend/server.js"
+      "dest": "/server.js"
     }
   ],
   "env": {
