@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Search } from 'lucide-react';
 import PatientCard from '../components/PatientCard';
-import { patientsAPI } from '../services/api';
+import { patientsAPI } from '../services/api-fixed';
 
 const Patients = () => {
   // Estados del componente

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, Camera, X } from 'lucide-react';
-import { patientsAPI } from '../services/api';
+import { patientsAPI } from '../services/api-fixed';
 import { uploadImage } from '../services/firebase-storage';
 import { auth } from '../services/firebase';
 import { signInAnonymously } from 'firebase/auth';

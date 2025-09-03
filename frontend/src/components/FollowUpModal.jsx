@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Camera, Upload } from 'lucide-react';
-import { consultationsAPI } from '../services/api';
+import { consultationsAPI } from '../services/api-fixed';
 
 const FollowUpModal = ({ isOpen, onClose, originalConsultation, onSave, setSelectedConsultation, setShowFollowUpModal, setFollowUpConsultation }) => {
   const navigate = useNavigate();

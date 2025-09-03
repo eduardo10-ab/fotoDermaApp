@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Upload, Camera, X, ArrowLeft } from 'lucide-react';
-import { patientsAPI, consultationsAPI } from '../services/api';
+import { patientsAPI, consultationsAPI } from '../services/api-fixed';
 
 const NewConsultation = () => {
   const { patientId } = useParams();
