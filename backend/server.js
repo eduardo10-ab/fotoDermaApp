@@ -279,5 +279,18 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
+// Agregar antes de las rutas existentes
+app.get('/debug', (req, res) => {
+  res.json({
+    message: 'Debug endpoint',
+    originalUrl: req.originalUrl,
+    baseUrl: req.baseUrl,
+    path: req.path,
+    method: req.method,
+    headers: req.headers,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Export para Vercel
 module.exports = app;
