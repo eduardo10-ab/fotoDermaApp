@@ -1,8 +1,9 @@
 import axios from 'axios';
 
-// CONFIGURACIÓN CORREGIDA - Base URL SIN /api
+// CONFIGURACIÓN CON DEBUG ADICIONAL
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://foto-derma-app-backend.vercel.app';
 
+console.log('🚀 API.JS VERSION: 3.0 - DEBUGGING');
 console.log('🌐 API Base URL:', API_BASE_URL);
 console.log('📊 Environment:', process.env.NODE_ENV);
 
@@ -36,9 +37,14 @@ api.interceptors.request.use(
       console.warn('⚠️ Request sin token de autorización');
     }
     
-    // Log detallado de la request
+    // Log MUY detallado de la request
     const fullURL = `${config.baseURL}${config.url}`;
-    console.log(`📤 ${config.method?.toUpperCase()} ${fullURL}`);
+    console.log('==== REQUEST DEBUG ====');
+    console.log('📤 Method:', config.method?.toUpperCase());
+    console.log('📤 Base URL:', config.baseURL);
+    console.log('📤 URL:', config.url);
+    console.log('📤 Full URL:', fullURL);
+    console.log('=======================');
     
     return config;
   },
@@ -58,12 +64,15 @@ api.interceptors.response.use(
   async (error) => {
     const fullURL = error.config ? `${error.config.baseURL}${error.config.url}` : 'URL desconocida';
     
+    console.error('==== ERROR DEBUG ====');
     console.error('❌ API Error:', {
       message: error.message,
       status: error.response?.status,
       data: error.response?.data,
       url: fullURL,
+      config: error.config
     });
+    console.error('=====================');
 
     // Manejar errores 401 - Token inválido
     if (error.response?.status === 401) {
@@ -106,10 +115,12 @@ export const apiService = {
     });
   },
 
-  // Pacientes (requieren auth) - CON /api
+  // Pacientes (requieren auth) - CON DEBUG
   getPatients: () => {
-    console.log('🏥 Obteniendo pacientes...');
-    return api.get('/api/patients'); // ✅ Ahora: https://domain.com/api/patients
+    console.log('🚨 DEBUG: getPatients llamado');
+    console.log('🚨 DEBUG: URL que se va a llamar: /api/patients');
+    console.log('🚨 DEBUG: Base URL:', API_BASE_URL);
+    return api.get('/api/patients');
   },
   getPatient: (id) => {
     console.log('🏥 Obteniendo paciente:', id);
@@ -132,7 +143,7 @@ export const apiService = {
     return api.get(`/api/patients/search?q=${encodeURIComponent(query)}`);
   },
 
-  // Consultas (requieren auth) - CON /api
+  // Consultas (requieren auth)
   getConsultationsByPatient: (patientId) => {
     console.log('📋 Obteniendo consultas del paciente:', patientId);
     return api.get(`/api/consultations/patient/${patientId}`);
@@ -166,7 +177,7 @@ export const apiService = {
     });
   },
 
-  // Auth endpoints - CON /api
+  // Auth endpoints
   verifyToken: () => {
     console.log('🔍 Verificando token...');
     return api.post('/api/auth/verify');
@@ -263,5 +274,9 @@ export const authAPI = {
   getCurrentUser: apiService.getCurrentUser,
   updateUserProfile: apiService.updateUserProfile,
 };
+
+// Log de inicialización
+console.log('🚀 api.js cargado correctamente - VERSION 3.0');
+console.log('🚀 patientsAPI disponible:', !!patientsAPI.getPatients);
 
 export default api;
