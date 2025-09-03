@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // CONFIGURACIÓN CORREGIDA - SIN /api en las llamadas
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://foto-derma-app-backend.vercel.app';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://foto-derma-app-backend.vercel.app/api';
 
 console.log('🌐 API Base URL:', API_BASE_URL);
 console.log('📊 Environment:', process.env.NODE_ENV);
