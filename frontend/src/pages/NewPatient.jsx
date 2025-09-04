@@ -5,6 +5,7 @@ import { patientsAPI } from '../services/api-fixed';
 import { uploadImage } from '../services/firebase-storage';
 import { auth } from '../services/firebase';
 import { signInAnonymously } from 'firebase/auth';
+import CameraComponent from '../components/CameraComponent';
 
 console.log('Métodos disponibles:', Object.keys(patientsAPI));
 const NewPatient = () => {
@@ -24,13 +25,9 @@ const NewPatient = () => {
   
   // Estados para la cámara
   const [showCamera, setShowCamera] = useState(false);
-  const [cameraReady, setCameraReady] = useState(false);
   
   // Referencias para elementos DOM
   const fileInputRef = useRef(null);
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const streamRef = useRef(null);
 
   /**
    * Asegura que el usuario esté autenticado antes de realizar operaciones
@@ -63,7 +60,7 @@ const NewPatient = () => {
 
   /**
    * Cancela la creación del paciente y reinicia el formulario
-   * Limpia todos los estados y detiene la cámara si está activa
+   * Limpia todos los estados
    */
   const handleCancel = () => {
     // Resetea el formulario a su estado inicial
@@ -77,11 +74,7 @@ const NewPatient = () => {
     
     setDiagnosis('');
     setPhotos([]);
-    
-    // Detiene la cámara si está activa
-    if (showCamera) {
-      stopCamera();
-    }
+    setShowCamera(false);
     
     // Limpia el input de archivos
     if (fileInputRef.current) {
@@ -89,22 +82,6 @@ const NewPatient = () => {
     }
     
     navigate('/new-patient');
-  };
-
-  /**
-   * Convierte un data URL a un objeto File
-   * Utilizado para convertir las fotos capturadas por la cámara
-   */
-  const dataURLtoFile = (dataUrl, filename) => {
-    const arr = dataUrl.split(',');
-    const mime = arr[0].match(/:(.*?);/)[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new File([u8arr], filename, { type: mime });
   };
 
   /**
@@ -138,116 +115,26 @@ const NewPatient = () => {
   };
 
   /**
-   * Inicia la cámara para capturar fotos
-   * Solicita permisos y configura el stream de video
+   * Maneja la captura de fotos desde el CameraComponent
+   * Recibe el objeto foto del componente de cámara
    */
-  const startCamera = async () => {
-    try {
-      // Verifica compatibilidad del navegador
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert('Tu navegador no soporta el acceso a la cámara');
-        return;
-      }
-
-      setShowCamera(true);
-      setCameraReady(false);
-      
-      // Configuración de la cámara
-      const constraints = {
-        video: {
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-          facingMode: 'user' // Cámara frontal
-        }
-      };
-      
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      streamRef.current = stream;
-      
-      // Configura el elemento video con un pequeño delay
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.onloadedmetadata = () => {
-            videoRef.current.play();
-          };
-          videoRef.current.oncanplay = () => {
-            setCameraReady(true);
-          };
-        }
-      }, 100);
-      
-    } catch (error) {
-      setShowCamera(false);
-      setCameraReady(false);
-      
-      // Manejo de errores específicos de la cámara
-      let errorMessage = 'No se pudo acceder a la cámara. ';
-      if (error.name === 'NotAllowedError') {
-        errorMessage += 'Debes permitir el acceso a la cámara en tu navegador.';
-      } else if (error.name === 'NotFoundError') {
-        errorMessage += 'No se encontró ninguna cámara en tu dispositivo.';
-      } else if (error.name === 'NotSupportedError') {
-        errorMessage += 'Tu navegador no soporta esta funcionalidad.';
-      } else {
-        errorMessage += error.message;
-      }
-      alert(errorMessage);
-    }
-  };
-
-  /**
-   * Captura una foto desde el stream de la cámara
-   * Utiliza un canvas para procesar la imagen del video
-   */
-  const takePhoto = () => {
-    if (!videoRef.current || !canvasRef.current) {
-      alert('Error: No se pudo acceder al video o canvas');
-      return;
-    }
-
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-    
-    // Verifica que el video tenga dimensiones válidas
-    if (video.videoWidth === 0 || video.videoHeight === 0) {
-      alert('La cámara aún no está lista, inténtalo de nuevo.');
-      return;
-    }
-    
-    // Configura el canvas con las dimensiones del video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    // Convierte el canvas a imagen
-    const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-    
-    // Crea un archivo desde la imagen capturada
-    const filename = `camera-${Date.now()}.jpg`;
-    const file = dataURLtoFile(imageDataUrl, filename);
-    
-    const newPhoto = {
-      id: Date.now() + Math.random(),
-      url: imageDataUrl,
-      file: file,
-      type: 'camera'
-    };
-    
-    setPhotos(prev => [...prev, newPhoto]);
-    stopCamera();
-  };
-
-  /**
-   * Detiene la cámara y limpia los recursos
-   */
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-    }
+  const handleCameraCapture = (photoObject) => {
+    setPhotos(prev => [...prev, photoObject]);
     setShowCamera(false);
-    setCameraReady(false);
+  };
+
+  /**
+   * Abre el componente de cámara
+   */
+  const openCamera = () => {
+    setShowCamera(true);
+  };
+
+  /**
+   * Cierra el componente de cámara
+   */
+  const closeCamera = () => {
+    setShowCamera(false);
   };
 
   /**
@@ -511,7 +398,7 @@ const NewPatient = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-9">
               <button
                 type="button"
-                onClick={startCamera}
+                onClick={openCamera}
                 disabled={loading}
                 className="flex items-center justify-center space-x-2 px-6 py-5 text-white rounded-2xl hover:bg-slate-700 transition-colors disabled:opacity-50"
                 style={{ backgroundColor: '#233F4C' }}
@@ -600,72 +487,13 @@ const NewPatient = () => {
         </form>
       </div>
 
-      {/* Modal de la cámara */}
+      {/* Componente de cámara */}
       {showCamera && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Tomar foto</h3>
-              <button
-                onClick={stopCamera}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X size={24} />
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              {/* Área del video */}
-              <div className="relative bg-gray-900 rounded-lg overflow-hidden" style={{ aspectRatio: '4/3' }}>
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="w-full h-full object-cover"
-                  onCanPlay={() => {
-                    setCameraReady(true);
-                  }}
-                />
-                {/* Indicador de carga de la cámara */}
-                {!cameraReady && (
-                  <div className="absolute inset-0 flex items-center justify-center text-white bg-gray-800 bg-opacity-75">
-                    <div className="text-center">
-                      <Camera size={48} className="mx-auto mb-2" />
-                      <p>Activando cámara...</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              {/* Botones del modal de cámara */}
-              <div className="flex space-x-4">
-                <button
-                  onClick={takePhoto}
-                  disabled={!cameraReady}
-                  className="flex-1 bg-slate-600 text-white py-4 px-4 rounded-2xl hover:bg-slate-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Tomar foto
-                </button>
-                <button
-                  onClick={stopCamera}
-                  className="flex-1 bg-gray-300 text-gray-700 py-4 px-4 rounded-2xl hover:bg-gray-400 transition-colors font-medium"
-                >
-                  Cancelar
-                </button>
-              </div>
-              
-              {/* Estado de la cámara */}
-              <div className="text-xs text-gray-500 text-center">
-                Estado: {cameraReady ? 'Cámara lista' : 'Cargando cámara...'}
-              </div>
-            </div>
-          </div>
-        </div>
+        <CameraComponent
+          onCapture={handleCameraCapture}
+          onClose={closeCamera}
+        />
       )}
-
-      {/* Canvas oculto para procesar las fotos de la cámara */}
-      <canvas ref={canvasRef} className="hidden" />
     </div>
   );
 };
