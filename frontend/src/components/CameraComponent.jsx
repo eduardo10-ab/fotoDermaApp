@@ -141,7 +141,7 @@ const CameraComponent = ({ onCapture, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-2 sm:p-4">
       {/* Contenedor responsivo */}
-      <div className="bg-white rounded-lg w-full h-full sm:w-[80vw] sm:h-[80vh] sm:max-w-4xl sm:max-h-[600px] flex flex-col">
+      <div className="bg-white rounded-lg w-full h-svh sm:w-[80vw] sm:h-[80vh] sm:max-w-4xl sm:max-h-[600px] flex flex-col">
         {/* Header */}
         <div className="flex justify-between items-center p-4 sm:p-6 border-b border-gray-200 flex-shrink-0">
           <h3 className="text-lg sm:text-xl font-semibold">
@@ -158,7 +158,7 @@ const CameraComponent = ({ onCapture, onClose }) => {
         {/* Contenido principal - ocupa el espacio restante */}
         <div className="flex-1 flex flex-col p-4 sm:p-6 space-y-4">
           {/* Contenedor del video stream - se expande para ocupar el espacio disponible */}
-          <div className="relative bg-gray-900 rounded-lg overflow-hidden flex-1 min-h-0">
+          <div className="relative bg-gray-900 rounded-lg overflow-hidden h-64 sm:h-96">
             <video
               ref={videoRef}
               autoPlay
@@ -196,13 +196,13 @@ const CameraComponent = ({ onCapture, onClose }) => {
             <button
               onClick={takePhoto}
               disabled={!cameraReady || switchingCamera}
-              className="flex-1 bg-blue-600 text-white py-3 sm:py-4 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 bg-slate-600 text-white py-3 sm:py-5 px-4 rounded-2xl hover:bg-slate-800  transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Tomar foto
             </button>
             <button
               onClick={stopCamera}
-              className="flex-1 bg-gray-300 text-gray-700 py-3 sm:py-4 px-4 rounded-lg hover:bg-gray-400 transition-colors font-medium"
+              className="flex-1 border-slate-200 text-slate-600 py-5 sm:py-5 px-4 rounded-2xl hover:bg-gray-400 transition-colors font-medium"
             >
               Cancelar
             </button>
