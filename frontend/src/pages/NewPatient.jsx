@@ -6,6 +6,7 @@ import { uploadImage } from '../services/firebase-storage';
 import { auth } from '../services/firebase';
 import { signInAnonymously } from 'firebase/auth';
 
+console.log('Métodos disponibles:', Object.keys(patientsAPI));
 const NewPatient = () => {
   const navigate = useNavigate();
   

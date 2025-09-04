@@ -7,6 +7,7 @@ import { patientsAPI, consultationsAPI  } from '../services/api-fixed';
 import { useNavigate } from 'react-router-dom';
 import {ArrowLeft } from 'lucide-react';
 
+console.log('Métodos disponibles:', Object.keys(patientsAPI));
 const PatientDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
