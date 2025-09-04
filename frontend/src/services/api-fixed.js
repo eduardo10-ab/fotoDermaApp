@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const API_BASE_URL = 'https://foto-derma-app-backend.vercel.app';
 
+
 console.log('NUEVO API ARCHIVO CARGADO - URL BASE:', API_BASE_URL);
 
 const api = axios.create({
@@ -13,7 +14,11 @@ const api = axios.create({
 });
 
 const getAuthToken = () => {
-  return localStorage.getItem('firebaseToken');
+  // Nota: localStorage no funciona en el servidor, agregar verificación
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('firebaseToken');
+  }
+  return null;
 };
 
 api.interceptors.request.use(
@@ -44,6 +49,7 @@ api.interceptors.response.use(
 );
 
 export const patientsAPI = {
+  // Mantener los nombres originales para compatibilidad
   getPatients: () => {
     console.log('Llamando a getPatients - URL: /api/patients');
     return api.get('/api/patients');
@@ -53,6 +59,19 @@ export const patientsAPI = {
   updatePatient: (id, data) => api.put(`/api/patients/${id}`, data),
   deletePatient: (id) => api.delete(`/api/patients/${id}`),
   searchPatients: (query) => api.get(`/api/patients/search?q=${encodeURIComponent(query)}`),
+  
+  // AGREGAR ALIASES para compatibilidad con NewPatient.jsx
+  getAll: () => {
+    console.log('Llamando a getAll (alias de getPatients)');
+    return api.get('/api/patients');
+  },
+  create: (data) => {
+    console.log('Llamando a create (alias de createPatient)');
+    return api.post('/api/patients', data);
+  },
+  update: (id, data) => api.put(`/api/patients/${id}`, data),
+  delete: (id) => api.delete(`/api/patients/${id}`),
+  getById: (id) => api.get(`/api/patients/${id}`),
 };
 
 export const consultationsAPI = {
@@ -68,6 +87,11 @@ export const consultationsAPI = {
   uploadConsultationPhotos: (id, formData) => api.post(`/api/consultations/${id}/photos`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
+  
+  // Agregar aliases si es necesario
+  create: (data) => api.post('/api/consultations', data),
+  getAll: () => api.get('/api/consultations'),
+  getByPatientId: (patientId) => api.get(`/api/consultations/patient/${patientId}`),
 };
 
 export const authAPI = {
