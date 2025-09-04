@@ -87,7 +87,7 @@ const Dashboard = () => {
       });
       
       // Obtener los primeros 9 pacientes más activos recientemente
-      const recent = sortedPatients.slice(0, 9);
+      const recent = sortedPatients.slice(0, 6);
       setRecentPatients(recent);
       
     } catch (error) {
@@ -107,7 +107,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="p-5 min-h-screen rounded-2xl max-w-6xl mx-auto" style={{ marginTop: '45px' }}>
+    <div className="p-5 min-h-screen rounded-2xl max-w-5xl mx-auto" style={{ marginTop: '45px' }}>
       <div className="mb-5">
         <h1 className="text-center text-3xl font-bold text-gray-800">Consultas recientes</h1>
       </div>

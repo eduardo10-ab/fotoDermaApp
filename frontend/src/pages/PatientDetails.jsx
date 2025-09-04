@@ -325,7 +325,7 @@ const PatientDetails = () => {
           ← Volver al historial
         </button>
         
-        <div className="bg-white rounded-xl shadow-sm p-11 border border-gray-200">
+        <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
           <h1 className="text-4xl font-bold text-gray-700 mb-10">Historial Clínico</h1>
           
           {/* Información de las fechas de consulta */}
@@ -390,7 +390,7 @@ const PatientDetails = () => {
                 ))}
               </div>
             ) : (
-              <div className="bg-slate-100 border border-slate-300 rounded-2xl px-8 py-6 mb-5 border-shadow-sm">
+              <div className="bg-slate-100 border border-slate-300 rounded-2xl px-5 py-6 mb-5 border-shadow-sm">
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
                   {selectedConsultation.diagnosis || 'Sin diagnóstico registrado'}
                 </p>

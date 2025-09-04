@@ -6,8 +6,10 @@ import { uploadImage } from '../services/firebase-storage';
 import { auth } from '../services/firebase';
 import { signInAnonymously } from 'firebase/auth';
 import CameraComponent from '../components/CameraComponent';
+import NotificationComponent from '../components/NotificationComponent'; // Importar el nuevo componente
 
 console.log('Métodos disponibles:', Object.keys(patientsAPI));
+
 const NewPatient = () => {
   const navigate = useNavigate();
   
@@ -26,8 +28,36 @@ const NewPatient = () => {
   // Estados para la cámara
   const [showCamera, setShowCamera] = useState(false);
   
+  // Estados para la notificación
+  const [notification, setNotification] = useState({
+    isVisible: false,
+    type: 'success', // 'success' | 'error'
+    message: ''
+  });
+  
   // Referencias para elementos DOM
   const fileInputRef = useRef(null);
+
+  /**
+   * Muestra una notificación
+   */
+  const showNotification = (type, message) => {
+    setNotification({
+      isVisible: true,
+      type,
+      message
+    });
+  };
+
+  /**
+   * Cierra la notificación
+   */
+  const closeNotification = () => {
+    setNotification(prev => ({
+      ...prev,
+      isVisible: false
+    }));
+  };
 
   /**
    * Asegura que el usuario esté autenticado antes de realizar operaciones
@@ -180,10 +210,10 @@ const NewPatient = () => {
         } catch (error) {
           // Manejo de errores específicos de Firebase
           if (error.message.includes('CORS')) {
-            alert('Error de CORS. Verifica la configuración de Firebase Storage.');
+            showNotification('error', 'Error de CORS. Verifica la configuración de Firebase Storage.');
             break;
           } else if (error.message.includes('unauthorized') || error.code === 'storage/unauthorized') {
-            alert('Error de permisos. Verifica las reglas de Firebase Storage.');
+            showNotification('error', 'Error de permisos. Verifica las reglas de Firebase Storage.');
             break;
           }
           
@@ -218,7 +248,7 @@ const NewPatient = () => {
           uploadedPhotos = await uploadPhotosToStorage(photos);
         } catch (uploadError) {
           uploadedPhotos = [];
-          alert('Warning: No se pudieron subir las fotos, pero se creará el paciente sin imágenes.');
+          showNotification('error', 'No se pudieron subir las fotos, pero se creará el paciente sin imágenes.');
         }
       }
 
@@ -253,23 +283,18 @@ const NewPatient = () => {
       const response = await patientsAPI.create(patientData);
       
       if (response.data) {
-        alert('Expediente creado exitosamente');
-        navigate('/');
+        showNotification('success', 'Expediente creado exitosamente');
+        
+        // Opcional: navegar después de cerrar la notificación
+        setTimeout(() => {
+          navigate('/');
+        }, 2000);
       } else {
         throw new Error('No se recibió respuesta del servidor');
       }
     } catch (error) {
       // Manejo detallado de errores
-      let errorMessage = 'Error al crear el expediente. ';
-      if (error.response) {
-        errorMessage += error.response.data?.message || 'Error del servidor';
-      } else if (error.message) {
-        errorMessage += error.message;
-      } else {
-        errorMessage += 'Error desconocido';
-      }
-      
-      alert(errorMessage);
+      showNotification('error', 'No se pudo crear el expediente');
     } finally {
       setLoading(false);
     }
@@ -494,6 +519,14 @@ const NewPatient = () => {
           onClose={closeCamera}
         />
       )}
+
+      {/* Componente de notificación personalizada */}
+      <NotificationComponent
+        isVisible={notification.isVisible}
+        type={notification.type}
+        message={notification.message}
+        onClose={closeNotification}
+      />
     </div>
   );
 };
