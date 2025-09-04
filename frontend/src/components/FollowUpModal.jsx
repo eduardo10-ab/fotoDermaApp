@@ -205,7 +205,7 @@ const handleSubmit = async (e) => {
       });
 
       try {
-        await consultationsAPI.uploadPhoto(consultationId, formDataPhotos);
+        await consultationsAPI.uploadPhotos(consultationId, formDataPhotos);
         console.log('Fotos del seguimiento subidas correctamente');
       } catch (photoError) {
         console.error('Error subiendo fotos del seguimiento:', photoError);

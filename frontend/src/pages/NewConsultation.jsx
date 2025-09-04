@@ -295,7 +295,7 @@ const NewConsultation = () => {
         });
 
         try {
-          await consultationsAPI.uploadPhoto(consultationId, formDataPhotos);
+          await consultationsAPI.uploadPhotos(consultationId, formDataPhotos);
         } catch (photoError) {
           alert('La consulta se creó correctamente, pero hubo un error al subir algunas fotos.');
         }
