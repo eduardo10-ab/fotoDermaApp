@@ -2,15 +2,14 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Camera, Upload } from 'lucide-react';
 import { consultationsAPI } from '../services/api-fixed';
+import CameraComponent from './CameraComponent';
 
 const FollowUpModal = ({ isOpen, onClose, originalConsultation, onSave, setSelectedConsultation, setShowFollowUpModal, setFollowUpConsultation }) => {
   const navigate = useNavigate();
   
   const [loading, setLoading] = useState(false);
   const [photos, setPhotos] = useState([]);
-
   const [showCamera, setShowCamera] = useState(false);
-  const [cameraReady, setCameraReady] = useState(false);
   
   const [formData, setFormData] = useState({
     date: '',
@@ -18,9 +17,6 @@ const FollowUpModal = ({ isOpen, onClose, originalConsultation, onSave, setSelec
   });
 
   const fileInputRef = useRef(null);
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const streamRef = useRef(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -28,18 +24,6 @@ const FollowUpModal = ({ isOpen, onClose, originalConsultation, onSave, setSelec
       ...prev,
       [name]: value
     }));
-  };
-
-  const dataURLtoFile = (dataurl, filename) => {
-    const arr = dataurl.split(',');
-    const mime = arr[0].match(/:(.*?);/)[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new File([u8arr], filename, { type: mime });
   };
 
   const handleFileUpload = (e) => {
@@ -66,214 +50,125 @@ const FollowUpModal = ({ isOpen, onClose, originalConsultation, onSave, setSelec
     }
   };
 
-  const startCamera = async () => {
-    try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert('Tu navegador no soporta el acceso a la cámara');
-        return;
-      }
-
-      setShowCamera(true);
-      setCameraReady(false);
-      
-      const constraints = {
-        video: {
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-          facingMode: 'user'
-        }
-      };
-      
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      streamRef.current = stream;
-      
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.onloadedmetadata = () => {
-            videoRef.current.play();
-          };
-          videoRef.current.oncanplay = () => {
-            setCameraReady(true);
-          };
-        }
-      }, 100);
-      
-    } catch (error) {
-      setShowCamera(false);
-      setCameraReady(false);
-      
-      let errorMessage = 'No se pudo acceder a la cámara. ';
-      if (error.name === 'NotAllowedError') {
-        errorMessage += 'Debes permitir el acceso a la cámara en tu navegador.';
-      } else if (error.name === 'NotFoundError') {
-        errorMessage += 'No se encontró ninguna cámara en tu dispositivo.';
-      } else if (error.name === 'NotSupportedError') {
-        errorMessage += 'Tu navegador no soporta esta funcionalidad.';
-      } else {
-        errorMessage += error.message;
-      }
-      alert(errorMessage);
-    }
-  };
-
-  const takePhoto = () => {
-    if (!videoRef.current || !canvasRef.current) {
-      alert('Error: No se pudo acceder al video o canvas');
-      return;
-    }
-
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-    
-    if (video.videoWidth === 0 || video.videoHeight === 0) {
-      alert('La cámara aún no está lista. Inténtalo de nuevo.');
-      return;
-    }
-    
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-    
-    const fileName = `camera_photo_${Date.now()}.jpg`;
-    const file = dataURLtoFile(imageDataUrl, fileName);
-    
-    const newPhoto = {
-      id: Date.now() + Math.random(),
-      url: imageDataUrl,
-      file: file,
-      type: 'camera'
-    };
-    
-    setPhotos(prev => [...prev, newPhoto]);
-    stopCamera();
-  };
-
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-    }
+  // Función para manejar la captura de foto desde CameraComponent
+  const handleCameraCapture = (photoObject) => {
+    setPhotos(prev => [...prev, photoObject]);
     setShowCamera(false);
-    setCameraReady(false);
+  };
+
+  // Función para cerrar la cámara
+  const handleCameraClose = () => {
+    setShowCamera(false);
   };
 
   const removePhoto = (photoId) => {
     setPhotos(prev => prev.filter(photo => photo.id !== photoId));
   };
 
-
-
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  // Prevenir múltiples envíos
-  if (loading) {
-    return;
-  }
-  
-  setLoading(true);
-
-  try {
-    // Preparar datos del seguimiento sin formateo adicional de fecha
-    const followUpData = {
-      patientId: originalConsultation.patientId,
-      date: formData.date, // Enviar la fecha tal como está del input date
-      diagnosis: formData.diagnosis,
-      originalConsultationId: originalConsultation.id
-    };
-
-    console.log('Enviando fecha de seguimiento al backend:', formData.date);
-
-    // USAR LA FUNCIÓN ESPECÍFICA DE SEGUIMIENTO
-    const response = await consultationsAPI.createFollowUp(followUpData);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     
-    // Usar el ID de la consulta actualizada
-    const consultationId = response.data.data.id || response.data.id;
+    // Prevenir múltiples envíos
+    if (loading) {
+      return;
+    }
+    
+    setLoading(true);
 
-    // Si hay fotos, subirlas a la consulta actualizada
-    if (photos.length > 0 && consultationId) {
-      const formDataPhotos = new FormData();
+    try {
+      // Preparar datos del seguimiento sin formateo adicional de fecha
+      const followUpData = {
+        patientId: originalConsultation.patientId,
+        date: formData.date, // Enviar la fecha tal como está del input date
+        diagnosis: formData.diagnosis,
+        originalConsultationId: originalConsultation.id
+      };
+
+      console.log('Enviando fecha de seguimiento al backend:', formData.date);
+
+      // USAR LA FUNCIÓN ESPECÍFICA DE SEGUIMIENTO
+      const response = await consultationsAPI.createFollowUp(followUpData);
       
-      // Agregar todas las fotos al FormData
-      photos.forEach((photo, index) => {
-        if (photo.file) {
-          formDataPhotos.append('photos', photo.file);
+      // Usar el ID de la consulta actualizada
+      const consultationId = response.data.data.id || response.data.id;
+
+      // Si hay fotos, subirlas a la consulta actualizada
+      if (photos.length > 0 && consultationId) {
+        const formDataPhotos = new FormData();
+        
+        // Agregar todas las fotos al FormData
+        photos.forEach((photo, index) => {
+          if (photo.file) {
+            formDataPhotos.append('photos', photo.file);
+          }
+        });
+
+        try {
+          await consultationsAPI.uploadPhotos(consultationId, formDataPhotos);
+          console.log('Fotos del seguimiento subidas correctamente');
+        } catch (photoError) {
+          console.error('Error subiendo fotos del seguimiento:', photoError);
+          alert('El seguimiento se creó correctamente, pero hubo un error al subir algunas fotos.');
         }
-      });
-
-      try {
-        await consultationsAPI.uploadPhotos(consultationId, formDataPhotos);
-        console.log('Fotos del seguimiento subidas correctamente');
-      } catch (photoError) {
-        console.error('Error subiendo fotos del seguimiento:', photoError);
-        alert('El seguimiento se creó correctamente, pero hubo un error al subir algunas fotos.');
       }
-    }
 
-    // Llamar al callback de guardado del componente padre
-    if (onSave) {
-      await onSave(response.data.data || response.data);
+      // Llamar al callback de guardado del componente padre
+      if (onSave) {
+        await onSave(response.data.data || response.data);
+      }
+      
+      // LIMPIAR ESTADOS Y NAVEGAR AL HISTORIAL PRINCIPAL
+      // Limpiar estados del modal para asegurar que se muestre la vista principal
+      if (setSelectedConsultation) {
+        setSelectedConsultation(null);
+      }
+      if (setShowFollowUpModal) {
+        setShowFollowUpModal(false);
+      }
+      if (setFollowUpConsultation) {
+        setFollowUpConsultation(null);
+      }
+      
+      // Limpiar el estado local del modal
+      setFormData({
+        date: '',
+        diagnosis: ''
+      });
+      setPhotos([]);
+      
+      // Cerrar modal
+      if (onClose) {
+        onClose();
+      }
+      
+      // Navegar al historial principal del paciente
+      navigate(`/patients/${originalConsultation.patientId}`);
+      
+    } catch (error) {
+      console.error('Error saving follow-up:', error);
+      
+      let errorMessage = 'Error al guardar el seguimiento';
+      if (error.response) {
+        errorMessage += `: ${error.response.data?.message || error.response.statusText}`;
+      } else if (error.request) {
+        errorMessage += ': No se pudo conectar con el servidor';
+      } else {
+        errorMessage += `: ${error.message}`;
+      }
+      
+      alert(errorMessage);
+    } finally {
+      setLoading(false);
     }
-    
-    // LIMPIAR ESTADOS Y NAVEGAR AL HISTORIAL PRINCIPAL
-    // Limpiar estados del modal para asegurar que se muestre la vista principal
-    if (setSelectedConsultation) {
-      setSelectedConsultation(null);
-    }
-    if (setShowFollowUpModal) {
-      setShowFollowUpModal(false);
-    }
-    if (setFollowUpConsultation) {
-      setFollowUpConsultation(null);
-    }
-    
-    // Limpiar el estado local del modal
-    setFormData({
-      date: '',
-      diagnosis: ''
-    });
-    setPhotos([]);
-    if (showCamera) {
-      stopCamera();
-    }
-    
-    // Cerrar modal
-    if (onClose) {
-      onClose();
-    }
-    
-    // Navegar al historial principal del paciente
-    navigate(`/patients/${originalConsultation.patientId}`);
-    
-  } catch (error) {
-    console.error('Error saving follow-up:', error);
-    
-    let errorMessage = 'Error al guardar el seguimiento';
-    if (error.response) {
-      errorMessage += `: ${error.response.data?.message || error.response.statusText}`;
-    } else if (error.request) {
-      errorMessage += ': No se pudo conectar con el servidor';
-    } else {
-      errorMessage += `: ${error.message}`;
-    }
-    
-    alert(errorMessage);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
   const handleCancel = () => {
     setFormData({
       date: '', 
       diagnosis: ''
     });
     setPhotos([]);
-    if (showCamera) {
-      stopCamera();
-    }
+    setShowCamera(false);
     // El botón cancelar solo cierra el modal sin navegación
     onClose();
   };
@@ -301,21 +196,21 @@ const handleSubmit = async (e) => {
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              <div>
-                <label className="block text-gray-600 font-medium mb-2">
-                  Fecha de la consulta
-                </label>
-                <input
-                  type="date"
-                  name="date"
-                  value={formData.date}
-                  onChange={handleInputChange}
-                  required
-                  max={new Date().toISOString().split('T')[0]}
-                  placeholder="dd/mm/aaaa"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-500 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-                />
-              </div>
+            <div>
+              <label className="block text-gray-600 font-medium mb-2">
+                Fecha de la consulta
+              </label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleInputChange}
+                required
+                max={new Date().toISOString().split('T')[0]}
+                placeholder="dd/mm/aaaa"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-500 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+              />
+            </div>
 
             <div>
               <label className="block text-gray-600 font-medium mb-2">
@@ -349,7 +244,7 @@ const handleSubmit = async (e) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <button
                   type="button"
-                  onClick={startCamera}
+                  onClick={() => setShowCamera(true)}
                   className="flex items-center justify-center space-x-2 px-6 py-5 bg-slate-600 text-white rounded-2xl hover:bg-slate-700 transition-colors"
                 >
                   <Camera size={20} />
@@ -387,7 +282,7 @@ const handleSubmit = async (e) => {
                           <X size={14} />
                         </button>
                         <div className="absolute bottom-1 left-1 bg-black bg-opacity-50 text-white text-xs px-1 rounded">
-                          {photo.type === 'camera' ? 'Cámara' : 'Subida'}
+                          {photo.type === 'camera' ? `Cámara ${photo.facingMode === 'user' ? 'Frontal' : 'Trasera'}` : 'Subida'}
                         </div>
                       </div>
                     ))}
@@ -417,60 +312,13 @@ const handleSubmit = async (e) => {
         </div>
       </div>
 
-      {/* Modal de cámara - con z-index más alto */}
+      {/* Componente de cámara con tamaño responsivo */}
       {showCamera && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-60">
-          <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Tomar foto</h3>
-              <button
-                onClick={stopCamera}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X size={24} />
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="relative bg-gray-900 rounded-lg overflow-hidden" style={{ aspectRatio: '4/3' }}>
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="w-full h-full object-cover"
-                />
-                {!cameraReady && (
-                  <div className="absolute inset-0 flex items-center justify-center text-white bg-gray-800 bg-opacity-75">
-                    <div className="text-center">
-                      <Camera size={48} className="mx-auto mb-2" />
-                      <p>Activando cámara...</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex space-x-4">
-                <button
-                  onClick={takePhoto}
-                  disabled={!cameraReady}
-                  className="flex-1 bg-slate-600 text-white py-4 px-4 rounded-2xl hover:bg-slate-700 transition-colors font-medium disabled:opacity-50"
-                >
-                  Tomar foto
-                </button>
-                <button
-                  onClick={stopCamera}
-                  className="flex-1 bg-gray-300 text-gray-700 py-4 px-4 rounded-2xl hover:bg-gray-400 transition-colors font-medium"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <CameraComponent
+          onCapture={handleCameraCapture}
+          onClose={handleCameraClose}
+        />
       )}
-
-      <canvas ref={canvasRef} className="hidden" />
     </>
   );
 };

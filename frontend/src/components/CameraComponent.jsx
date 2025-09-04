@@ -4,6 +4,7 @@ import { Camera, X, RotateCcw } from 'lucide-react';
 /**
  * Componente de cámara que permite capturar fotos desde el dispositivo
  * Soporta cambio entre cámara frontal y trasera en dispositivos móviles
+ * Responsivo: usa 80% del viewport en desktop/tablet, modal completo en móvil
  */
 const CameraComponent = ({ onCapture, onClose }) => {
   const [facingMode, setFacingMode] = useState('environment'); // 'user' = frontal, 'environment' = trasera
@@ -138,23 +139,26 @@ const CameraComponent = ({ onCapture, onClose }) => {
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">
+    <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-2 sm:p-4">
+      {/* Contenedor responsivo */}
+      <div className="bg-white rounded-lg w-full h-full sm:w-[80vw] sm:h-[80vh] sm:max-w-4xl sm:max-h-[600px] flex flex-col">
+        {/* Header */}
+        <div className="flex justify-between items-center p-4 sm:p-6 border-b border-gray-200 flex-shrink-0">
+          <h3 className="text-lg sm:text-xl font-semibold">
             Cámara {facingMode === 'user' ? 'Frontal' : 'Trasera'}
           </h3>
           <button
             onClick={stopCamera}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700 p-1"
           >
             <X size={24} />
           </button>
         </div>
         
-        <div className="space-y-4">
-          {/* Contenedor del video stream */}
-          <div className="relative bg-gray-900 rounded-lg overflow-hidden" style={{ aspectRatio: '4/3' }}>
+        {/* Contenido principal - ocupa el espacio restante */}
+        <div className="flex-1 flex flex-col p-4 sm:p-6 space-y-4">
+          {/* Contenedor del video stream - se expande para ocupar el espacio disponible */}
+          <div className="relative bg-gray-900 rounded-lg overflow-hidden flex-1 min-h-0">
             <video
               ref={videoRef}
               autoPlay
@@ -168,7 +172,9 @@ const CameraComponent = ({ onCapture, onClose }) => {
               <div className="absolute inset-0 flex items-center justify-center text-white bg-gray-800 bg-opacity-75">
                 <div className="text-center">
                   <Camera size={48} className="mx-auto mb-2" />
-                  <p>{switchingCamera ? 'Cambiando cámara...' : 'Activando cámara...'}</p>
+                  <p className="text-sm sm:text-base">
+                    {switchingCamera ? 'Cambiando cámara...' : 'Activando cámara...'}
+                  </p>
                 </div>
               </div>
             )}
@@ -177,7 +183,7 @@ const CameraComponent = ({ onCapture, onClose }) => {
             {cameraReady && !switchingCamera && (
               <button
                 onClick={switchCamera}
-                className="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-opacity"
+                className="absolute top-2 right-2 bg-black bg-opacity-50 text-white p-2 sm:p-3 rounded-full hover:bg-opacity-70 transition-opacity"
                 title="Cambiar cámara"
               >
                 <RotateCcw size={20} />
@@ -186,24 +192,24 @@ const CameraComponent = ({ onCapture, onClose }) => {
           </div>
           
           {/* Botones de acción */}
-          <div className="flex space-x-4">
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 flex-shrink-0">
             <button
               onClick={takePhoto}
               disabled={!cameraReady || switchingCamera}
-              className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 bg-blue-600 text-white py-3 sm:py-4 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              📸 Capturar
+              Tomar foto
             </button>
             <button
               onClick={stopCamera}
-              className="flex-1 bg-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-400 transition-colors font-medium"
+              className="flex-1 bg-gray-300 text-gray-700 py-3 sm:py-4 px-4 rounded-lg hover:bg-gray-400 transition-colors font-medium"
             >
               Cancelar
             </button>
           </div>
           
           {/* Información del estado de la cámara */}
-          <div className="text-xs text-gray-500 text-center">
+          <div className="text-xs sm:text-sm text-gray-500 text-center flex-shrink-0">
             Cámara: {facingMode === 'user' ? 'Frontal' : 'Trasera'} | 
             Estado: {cameraReady ? 'Lista' : 'Cargando...'}
           </div>
