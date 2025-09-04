@@ -1,12 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, Camera, X } from 'lucide-react';
+import { Upload, Camera, X, CheckCircle, XCircle } from 'lucide-react';
 import { patientsAPI } from '../services/api-fixed';
 import { uploadImage } from '../services/firebase-storage';
 import { auth } from '../services/firebase';
 import { signInAnonymously } from 'firebase/auth';
 import CameraComponent from '../components/CameraComponent';
-import NotificationComponent from '../components/NotificationComponent'; // Importar el nuevo componente
 
 console.log('Métodos disponibles:', Object.keys(patientsAPI));
 
@@ -37,6 +36,74 @@ const NewPatient = () => {
   
   // Referencias para elementos DOM
   const fileInputRef = useRef(null);
+
+  // Componente de notificación integrado
+  const NotificationModal = ({ isVisible, type, message, onClose, duration = 5000 }) => {
+    useEffect(() => {
+      if (isVisible && duration > 0) {
+        const timer = setTimeout(() => {
+          onClose();
+        }, duration);
+        
+        return () => clearTimeout(timer);
+      }
+    }, [isVisible, duration, onClose]);
+
+    if (!isVisible) return null;
+
+    const isSuccess = type === 'success';
+    
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 mx-4 max-w-md w-full transform transition-all duration-300 ease-in-out scale-100">
+          {/* Botón cerrar */}
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X size={20} />
+            </button>
+          </div>
+          
+          {/* Contenido de la notificación */}
+          <div className="text-center">
+            {/* Icono */}
+            <div className="flex justify-center mb-4">
+              {isSuccess ? (
+                <CheckCircle 
+                  size={48} 
+                  className="text-green-500" 
+                />
+              ) : (
+                <XCircle 
+                  size={48} 
+                  className="text-red-500" 
+                />
+              )}
+            </div>
+            
+            {/* Mensaje */}
+            <p className="text-lg font-medium text-gray-800 mb-6">
+              {message}
+            </p>
+            
+            {/* Botón de acción */}
+            <button
+              onClick={onClose}
+              className={`w-full px-6 py-3 rounded-xl font-medium transition-colors ${
+                isSuccess
+                  ? 'bg-green-500 text-white hover:bg-green-600'
+                  : 'bg-red-500 text-white hover:bg-red-600'
+              }`}
+            >
+              Aceptar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   /**
    * Muestra una notificación
@@ -520,8 +587,8 @@ const NewPatient = () => {
         />
       )}
 
-      {/* Componente de notificación personalizada */}
-      <NotificationComponent
+      {/* Componente de notificación integrado */}
+      <NotificationModal
         isVisible={notification.isVisible}
         type={notification.type}
         message={notification.message}
