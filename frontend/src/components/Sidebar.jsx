@@ -63,7 +63,7 @@ const Sidebar = () => {
         <div className="fixed top-4 left-4 z-50 md:hidden">
           <button
             onClick={toggleMobileMenu}
-            className=" text-white p-3 rounded-lg shadow-lg hover:bg-teal-800 transition-colors"
+            className=" text-white p-3 ml-3 rounded-xl shadow-lg hover:bg-teal-800 transition-colors"
              style={{ backgroundColor: '#233F4C' }}
             aria-label="Abrir menú"
           >
@@ -87,7 +87,7 @@ const Sidebar = () => {
             ? `fixed top-0 left-0 z-50 w-80 transform transition-transform duration-300 ease-in-out ${
                 isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
               }`
-            : 'w-80 fixed left-0 top-0'
+            : 'w-80 fixed left-0 top-0 z-10'
           }
         `}
       style={{ backgroundColor: '#233F4C' }}>
@@ -141,7 +141,7 @@ const Sidebar = () => {
         {/* Footer con información de copyright */}
         <div className="p-4 border-t border-white/10">
           <div className="text-xs text-white text-center">
-            © 2024 FotoDerma
+            © 2025 FotoDerma
           </div>
         </div>
       </div>

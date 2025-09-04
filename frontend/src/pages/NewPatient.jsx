@@ -73,7 +73,7 @@ const NewPatient = () => {
               {isSuccess ? (
                 <CheckCircle 
                   size={48} 
-                  className="text-green-500" 
+                  className="text-slate-600" 
                 />
               ) : (
                 <XCircle 
@@ -93,8 +93,8 @@ const NewPatient = () => {
               onClick={onClose}
               className={`w-full px-6 py-3 rounded-xl font-medium transition-colors ${
                 isSuccess
-                  ? 'bg-green-500 text-white hover:bg-green-600'
-                  : 'bg-red-500 text-white hover:bg-red-600'
+                  ? 'bg-slate-600 text-white hover:bg-slate-500'
+                  : 'bg-red-900 text-white hover:bg-red-700'
               }`}
             >
               Aceptar

@@ -62,10 +62,10 @@ const Navbar = () => {
 
   return (
     <header className={`
-      fixed top-0 right-0 py-4 bg-gray-100 z-40 mx-5 px-3
+      fixed top-0 right-0 py-4 bg-gray-100 mx-5 px-3
       ${isMobile 
-        ? 'left-0' 
-        : 'left-80'
+        ? 'left-0 z-30' // z-index reducido en móvil para que quede debajo del overlay del sidebar
+        : 'left-80 z-40' // z-index normal en desktop
       }
     `}>
       <div className="flex justify-end items-center">
@@ -99,7 +99,7 @@ const Navbar = () => {
 
           {/* Menu desplegable */}
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-[60]">
+            <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-[70]">
                 {/* Información del usuario actual */}
                 <div className="px-4 py-3 border-b border-gray-100">
                   <div className="flex items-center space-x-3">

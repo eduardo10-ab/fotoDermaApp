@@ -317,7 +317,7 @@ const PatientDetails = () => {
   // Vista de detalles de consulta seleccionada
   if (selectedConsultation) {
     return (
-      <div className="p-6 min-h-screen rounded-lg max-w-5xl mx-auto" style={{ marginTop: '20px' }}>
+      <div className=" min-h-screen rounded-lg max-w-6xl mx-auto" style={{ marginTop: '40px' }}>
         <button
           onClick={handleBackToHistory}
           className="text-teal-900 hover:text-teal-700 font-bold py-5 text-lg"
@@ -325,11 +325,11 @@ const PatientDetails = () => {
           ← Volver al historial
         </button>
         
-        <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
-          <h1 className="text-4xl font-bold text-gray-700 mb-10">Historial Clínico</h1>
+        <div className="bg-white rounded-xl shadow-sm px-7 py-5 border border-gray-200">
+          <h1 className="text-4xl font-bold text-center text-gray-700 mb-10">Historial Clínico</h1>
           
           {/* Información de las fechas de consulta */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div>
               <h3 className="text-xl font-semibold text-gray-700 mb-2">Fecha de consulta</h3>
               {selectedConsultation.allConsultations && selectedConsultation.allConsultations.length > 1 ? (
