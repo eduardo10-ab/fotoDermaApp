@@ -94,12 +94,12 @@ const Patients = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto" style={{ marginTop: '60px' }}>
+<div className="space-y-6 max-w-5xl mx-auto" style={{ marginTop: '60px' }}>
       {/* Barra de búsqueda */}
       <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-        <form onSubmit={handleSearch} className="flex space-x-4">
+        <form onSubmit={handleSearch} className="space-y-4">
           {/* Campo de búsqueda */}
-          <div className="flex-1 relative rounded-xl">
+          <div className="relative rounded-xl">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
@@ -110,25 +110,28 @@ const Patients = () => {
             />
           </div>
           
-          {/* Botón de búsqueda */}
-          <button
-            type="submit"
-            disabled={!searchQuery.trim() || loading}
-            className="bg-slate-700 hover:bg-slate-800 disabled:bg-gray-400 text-white px-8 py-3 rounded-xl font-medium transition-colors"
-          >
-            {loading ? 'Buscando...' : 'Buscar'}
-          </button>
-          
-          {/* Botón de limpiar (solo visible después de buscar) */}
-          {hasSearched && (
+          {/* Contenedor de botones - responsive */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            {/* Botón de búsqueda */}
             <button
-              type="button"
-              onClick={clearSearch}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-xl font-medium transition-colors"
+              type="submit"
+              disabled={!searchQuery.trim() || loading}
+              className="w-full sm:w-auto bg-slate-700 hover:bg-slate-800 disabled:bg-gray-400 text-white px-8 py-3 rounded-xl font-medium transition-colors order-1"
             >
-              Limpiar
+              {loading ? 'Buscando...' : 'Buscar'}
             </button>
-          )}
+            
+            {/* Botón de limpiar (solo visible después de buscar) */}
+            {hasSearched && (
+              <button
+                type="button"
+                onClick={clearSearch}
+                className="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-xl font-medium transition-colors order-2"
+              >
+                Limpiar
+              </button>
+            )}
+          </div>
         </form>
       </div>
 
@@ -141,7 +144,7 @@ const Patients = () => {
 
       {/* Contador de resultados */}
       {hasSearched && !loading && searchQuery && (
-        <div className="text-gray-600">
+        <div className="text-gray-600 px-2">
           Se encontraron {filteredPatients.length} resultado{filteredPatients.length !== 1 ? 's' : ''} para "{searchQuery}"
         </div>
       )}
