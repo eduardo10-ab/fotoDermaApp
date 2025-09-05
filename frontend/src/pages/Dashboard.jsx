@@ -87,7 +87,7 @@ const Dashboard = () => {
       });
       
       // Obtener los primeros 9 pacientes más activos recientemente
-      const recent = sortedPatients.slice(0, 9);
+      const recent = sortedPatients.slice(0, 8);
       setRecentPatients(recent);
       
     } catch (error) {
@@ -107,13 +107,13 @@ const Dashboard = () => {
   }
 
   return (
-    <div className=" min-h-screen rounded-2xl max-w-6xl mx-auto" style={{ marginTop: '55px' }}>
+    <div className=" min-h-screen rounded-2xl max-w-6xl mx-auto" style={{ marginTop: '75px' }}>
       <div className="mb-5">
-        <h1 className="text-center text-3xl font-bold text-gray-800">Consultas recientes</h1>
+        <h1 className="text-center text-4xl font-bold text-gray-800">Consultas recientes</h1>
       </div>
 
       {recentPatients.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 p-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-9 px-1 pt-5">
           {recentPatients.map((patient) => (
             <PatientCard key={patient.id} patient={patient} />
           ))}

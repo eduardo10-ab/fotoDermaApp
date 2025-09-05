@@ -472,6 +472,8 @@ const getFilterText = () => {
               )}
             </div>
 
+
+
             {(selectedConsultation.photos && selectedConsultation.photos.length > 0) ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {(filteredPhotos.length > 0 ? filteredPhotos : selectedConsultation.photos).map((photo, index) => (
@@ -489,6 +491,12 @@ const getFilterText = () => {
                       <span className="text-gray-500">Imagen no disponible</span>
                     </div>
 
+                    {/* Fecha en la esquina inferior izquierda */}
+                    <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-lg backdrop-blur-sm">
+                      {formatDate(photo.uploadedAt || photo.createdAt || photo.date || selectedConsultation.date)}
+                    </div>
+
+                    {/* Botón de maximizar */}
                     <button 
                       className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                       onClick={() => window.open(photo.url || photo, '_blank')}
@@ -809,7 +817,7 @@ const getFilterText = () => {
               </Link>
             </div>
           )}
-        </div>
+      </div>
       </div>
 
       {/* Modal en la vista principal */}
