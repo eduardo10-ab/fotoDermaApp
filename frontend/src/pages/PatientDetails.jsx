@@ -78,19 +78,23 @@ const PatientDetails = () => {
 
     // Aplicar filtro de fecha
     if (dateFilter !== 'desc') {
-      filtersCount++;
-    }
-    
-    filtered.sort((a, b) => {
-      const dateA = new Date(a.date || a.createdAt);
-      const dateB = new Date(b.date || b.createdAt);
-      return dateFilter === 'asc' ? dateA - dateB : dateB - dateA;
-    });
+          filtersCount++;
+        }
 
-    // Aplicar filtro de enfermedad
-    if (diseaseFilter !== 'none') {
-      filtersCount++;
-      filtered.sort((a, b) => {
+        if (diseaseFilter !== 'none') {
+          filtersCount++;
+        }
+
+        // Aplicar filtro de fecha
+        filtered.sort((a, b) => {
+          const dateA = new Date(a.date || a.createdAt);
+          const dateB = new Date(b.date || b.createdAt);
+          return dateFilter === 'asc' ? dateA - dateB : dateB - dateA;
+        });
+
+        // Aplicar filtro de enfermedad
+        if (diseaseFilter !== 'none') {
+          filtered.sort((a, b) => {
         const diseaseA = (a.disease || '').toLowerCase().trim();
         const diseaseB = (b.disease || '').toLowerCase().trim();
         
@@ -154,13 +158,14 @@ const PatientDetails = () => {
     }
   }, [applyPhotoFilters, selectedConsultation?.photos?.length]);
 
-  const handleFilterChange = (filterType, value) => {
-    if (filterType === 'date') {
-      setDateFilter(value);
-    } else if (filterType === 'disease') {
-      setDiseaseFilter(value);
-    }
-  };
+const handleFilterChange = (filterType, value) => {
+  if (filterType === 'date') {
+    setDateFilter(value);
+  } else if (filterType === 'disease') {
+    setDiseaseFilter(value);
+  }
+  // NO cerrar el menú automáticamente
+};
 
   const handlePhotoFilterChange = (value) => {
     setPhotoDateFilter(value);
@@ -258,26 +263,27 @@ const PatientDetails = () => {
     }
   };
 
-  const getFilterText = () => {
-    const filters = [];
-    
-    if (dateFilter === 'asc') {
-      filters.push('Fecha: Más antiguo primero');
-    } else if (dateFilter === 'desc' && (diseaseFilter !== 'none' || activeFilters > 0)) {
-      filters.push('Fecha: Más reciente primero');
-    }
-    
-    if (diseaseFilter === 'asc') {
-      filters.push('Enfermedad: A-Z');
-    } else if (diseaseFilter === 'desc') {
-      filters.push('Enfermedad: Z-A');
-    }
-    
-    return filters.length > 0 ? filters.join(' • ') : 'Filtrar';
-  };
+const getFilterText = () => {
+  const filters = [];
+  
+  // Solo mostrar filtro de fecha si NO es el valor por defecto
+  if (dateFilter === 'asc') {
+    filters.push('Más antiguo');
+  }
 
+
+  // Mostrar filtro de enfermedad si NO es 'none'
+  if (diseaseFilter === 'asc') {
+    filters.push('A-Z');
+  } else if (diseaseFilter === 'desc') {
+    filters.push('Z-A');
+  }
+  
+  // Si hay filtros activos, mostrarlos; si no, mostrar texto por defecto
+  return filters.length > 0 ? filters.join(' • ') : ' ';
+};
   const getPhotoFilterText = () => {
-    return photoDateFilter === 'asc' ? 'Más antiguas primero' : 'Más recientes primero';
+    return photoDateFilter === 'asc' ? ' ' : ' ';
   };
 
   if (loading) {
@@ -338,7 +344,7 @@ const PatientDetails = () => {
                     <div key={consultation.id} className="flex items-center space-x-2">
                       <p className="text-gray-700">
                         {formatDate(consultation.date)}
-                        {index === 0 && ' (más reciente)'}
+                        {index === 0 && ' (Reciente)'}
                         {index === selectedConsultation.allConsultations.length - 1 && index > 0 && ' (inicial)'}
                       </p>
                       {consultation.isFollowUp && (
@@ -375,7 +381,7 @@ const PatientDetails = () => {
                     <div className="flex justify-between items-start mb-2">
                       <span className="text-sm font-medium text-gray-600">
                         {formatDate(diagnosisEntry.date)}
-                        {index === 0 && ' (más reciente)'}
+                        {index === 0 && ' (Reciente)'}
                       </span>
                       {diagnosisEntry.isFollowUp && (
                         <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
@@ -439,8 +445,8 @@ const PatientDetails = () => {
                             onChange={(e) => handlePhotoFilterChange(e.target.value)}
                             className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-teal-900 focus:border-teal-900"
                           >
-                            <option value="desc">Más recientes primero</option>
-                            <option value="asc">Más antiguas primero</option>
+                            <option value="desc">Recientes</option>
+                            <option value="asc">Antiguas</option>
                           </select>
                         </div>
 
@@ -595,12 +601,107 @@ const PatientDetails = () => {
           </div>
         </div>
 
-        {/* Historial clínico */}
-        <div className="bg-white rounded-xl p-6 max-w-5xl mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">Historial Clínico</h2>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
+
+{/* Historial clínico */}
+      <div className="bg-white rounded-xl p-6 max-w-5xl mx-auto">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6">
+            {/* Layout para móviles mejorado */}
+            <div className="sm:hidden">
+              {/* Título y contador en la misma línea */}
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-gray-800">Historial Clínico</h2>
+                <span className="text-sm bg-gray-100 rounded-xl px-4 py-2 text-gray-500 font-semibold">
+                  {consultations.length} consulta{consultations.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+              
+              {/* Botón de filtros centrado */}
+              <div className="flex justify-center">
+                <div className="relative w-full max-w-sm">
+                  <button 
+                    onClick={() => setShowFilterMenu(!showFilterMenu)}
+                    className={`w-auto flex items-center justify-center space-x-2 text-gray-600 hover:text-gray-700 text-sm px-4 py-2.5 rounded-lg border border-gray-300 hover:border-gray-400 transition-colors ${
+                      activeFilters > 0 ? 'bg-teal-50 border-teal-900 text-[#233F4C]' : ''
+                    }`}
+                  >
+                    <Filter size={16} />
+                    <span className="flex-1 text-center">{getFilterText()}</span>
+                    {activeFilters > 0 && (
+                      <span className="bg-teal-900 text-white text-xs rounded-full px-2 py-0.5 ml-2">
+                        {activeFilters}
+                      </span>
+                    )}
+                    <ChevronDown size={16} className={`transition-transform ${showFilterMenu ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {showFilterMenu && (
+                    <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                      <div className="p-4 space-y-4">
+                        <div className="flex justify-between items-center">
+                          <h3 className="font-semibold text-gray-800">Filtros</h3>
+                          <button
+                            onClick={() => setShowFilterMenu(false)}
+                            className="text-gray-400 hover:text-gray-600"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Ordenar por fecha
+                          </label>
+                          <select
+                            value={dateFilter}
+                            onChange={(e) => handleFilterChange('date', e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-teal-900 focus:border-teal-900"
+                          >
+                            <option value="desc">Reciente</option>
+                            <option value="asc">Antiguo</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Ordenar por enfermedad
+                          </label>
+                          <select
+                            value={diseaseFilter}
+                            onChange={(e) => handleFilterChange('disease', e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-teal-900 focus:border-teal-900"
+                          >
+                            <option value="none">Sin ordenar</option>
+                            <option value="asc">A - Z</option>
+                            <option value="desc">Z - A</option>
+                          </select>
+                        </div>
+
+                        <div className="flex justify-between pt-2 border-t border-gray-200">
+                          <button
+                            onClick={clearFilters}
+                            className="text-sm text-gray-600 hover:text-gray-700"
+                          >
+                            Limpiar filtros
+                          </button>
+                          <button
+                            onClick={() => setShowFilterMenu(false)}
+                            className="hover:bg-gray-400 text-white px-4 py-2 rounded-md text-sm"
+                            style={{ backgroundColor: '#233F4C' }}
+                          >
+                            Aplicar
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Layout para tablet/desktop - sin cambios */}
+            <h2 className="hidden sm:block text-2xl font-bold text-gray-800">Historial Clínico</h2>
+            <div className="hidden sm:flex items-center space-x-4">
+              <span className="text-sm bg-gray-100 rounded-xl px-4 py-2 text-gray-500 font-semibold">
                 {consultations.length} consulta{consultations.length !== 1 ? 's' : ''}
               </span>
               
@@ -643,8 +744,9 @@ const PatientDetails = () => {
                           onChange={(e) => handleFilterChange('date', e.target.value)}
                           className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-teal-900 focus:border-teal-900"
                         >
-                          <option value="desc">Más reciente primero</option>
-                          <option value="asc">Más antiguo primero</option>
+                          <option value="none">Sin ordenar</option>
+                          <option value="desc">Reciente</option>
+                          <option value="asc">Antiguo</option>
                         </select>
                       </div>
 
@@ -725,5 +827,6 @@ const PatientDetails = () => {
     </>
   );
 };
+
 
 export default PatientDetails;

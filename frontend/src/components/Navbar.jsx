@@ -73,7 +73,7 @@ const Navbar = () => {
         <div className="relative z-50" ref={dropdownRef}>
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center space-x-3 text-white px-4 py-2 rounded-full hover:bg-teal-800 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+            className="flex items-center space-x-3 text-white px-4 pb-2 pt-2 rounded-2xl hover:bg-teal-800 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
            style={{ backgroundColor: '#233F4C' }}>
             <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
               {user?.photoURL ? (
@@ -99,7 +99,7 @@ const Navbar = () => {
 
           {/* Menu desplegable */}
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-[70]">
+            <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-200 py-1 z-[70]">
                 {/* Información del usuario actual */}
                 <div className="px-4 py-3 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
@@ -121,7 +121,7 @@ const Navbar = () => {
                       <p className="text-xs text-gray-500 truncate">
                         {user?.email}
                       </p>
-                      <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full mt-1">
+                      <span className="inline-block px-2 py-1 text-xs bg-teal-100 text-teal-700 rounded-lg mt-1">
                         Cuenta activa
                       </span>
                     </div>
@@ -142,12 +142,12 @@ const Navbar = () => {
                         onClick={() => handleSwitchAccount(account)}
                         className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-center space-x-3"
                       >
-                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <div className="w-8 h-8 bg-gray-100 rounded-2xl flex items-center justify-center flex-shrink-0">
                           {account.photoURL ? (
                             <img 
                               src={account.photoURL} 
                               alt="Profile" 
-                              className="w-8 h-8 rounded-full object-cover"
+                              className="w-8 h-8 rounded-2xl object-cover"
                             />
                           ) : (
                             <User size={16} className="text-gray-600" />
@@ -172,7 +172,7 @@ const Navbar = () => {
                     onClick={handleAddAccount}
                     className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors flex items-center space-x-3 text-gray-700"
                   >
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#233F4C' }}>
+                    <div className="w-8 h-8 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#233F4C' }}>
                       <UserPlus size={16} className="text-white" />
                     </div>
                     <span className="text-sm font-medium">Agregar cuenta</span>
@@ -180,10 +180,10 @@ const Navbar = () => {
 
                   <button
                     onClick={handleLogout}
-                    className="w-full px-4 py-3 text-left hover:bg-red-50 transition-colors flex items-center space-x-3 text-red-600"
+                    className="w-full px-4 py-3 text-left hover:bg-red-50 transition-colors flex items-center space-x-3 text-red-800"
                   >
                     <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <LogOut size={16} className="text-red-600" />
+                      <LogOut size={16} className="text-red-800" />
                     </div>
                     <span className="text-sm font-medium">Cerrar sesión</span>
                   </button>
