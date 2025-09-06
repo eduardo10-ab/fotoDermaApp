@@ -109,7 +109,7 @@ const Settings = () => {
     <div className="max-w-5xl mx-auto space-y-8" style={{ marginTop: '60px' }}>
       {/* Sección de configuración de cuenta */}
       <div className="bg-white rounded-xl shadow-sm p-8 border border-gray-200 mt-11">
-        <h1 className="text-2xl font-bold text-gray-800 mb-8">Cuenta</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-8">Cuenta</h1>
         
         <div className="bg-gray-100 rounded-lg">
           {/* Dropdown de cuentas */}
@@ -247,7 +247,7 @@ const Settings = () => {
 
       {/* Sección de configuración de visualización */}
       <div className="bg-white rounded-xl shadow-sm p-8 border border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-800 mb-8">Visualización</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-8">Visualización</h1>
         
         <div className="bg-gray-100 rounded-lg p-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-6">Zoom de la aplicación</h2>
@@ -282,19 +282,21 @@ const Settings = () => {
           </div>
         </div>
 
-        {/* Sección de Soporte */}
-        <div className="bg-gray-100 rounded-lg p-6 mt-6">
+       
+      </div>
+ {/* Sección de Soporte */}
+        <div className="bg-white rounded-lg p-6 mt-6">
           <div className="flex items-center space-x-3 mb-6">
             
-            <h2 className="text-xl font-semibold text-gray-800">Soporte de la aplicación</h2>
+            <h2 className="text-3xl font-bold text-gray-800">Soporte de la aplicación</h2>
           </div>
           
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="bg-gray-100 rounded-xl p-4  border-gray-200">
             <div className="text-center space-y-4">
               <div>
                
-                <h3 className="text-lg text-gray-800 font-semibold mt-1">Soporte técnico especializado</h3>
-                 <h4 className="font-semibold text-gray-600 ">Joel Fuentes</h4>
+                <h3 className="text-xl text-gray-800 font-semibold mt-1">Soporte técnico especializado</h3>
+                 <h4 className="text-lg font-semibold text-gray-600 ">Joel Fuentes</h4>
               </div>
               
               <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-2 md:gap-4">
@@ -306,11 +308,11 @@ const Settings = () => {
                     <p className="text-sm text-gray-600 font-semibold">fuentesjoel723@gmail.com</p>
                   </div>
                 </div>
-                <div className="flex items-center justify-center space-x-8 p-4 border-2 bg-cyan-50 rounded-xl  border-cyan-800">
+                <div className="flex items-center justify-center space-x-8 p-4 border-2 bg-gray-50 rounded-xl  border-gray-200">
                
                   <div className="text-center">
                     <p className="text-lg font-semibold text-gray-800">Teléfono</p>
-                    <p className="text-sm text-cyan-800 font-semibold">+503 7722 0472</p>
+                    <p className="text-sm text-gray-600 font-semibold">+503 7722 0472</p>
                   </div>
                 </div>
                 
@@ -326,8 +328,6 @@ const Settings = () => {
             </div>
           </div>
         </div>
-      </div>
-
       {/* Estilos CSS personalizados para el control deslizante */}
       <style dangerouslySetInnerHTML={{
         __html: `
