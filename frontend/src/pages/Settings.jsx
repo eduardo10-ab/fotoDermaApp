@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { UserPlus, LogOut, User, ChevronDown } from 'lucide-react';
+import { UserPlus, LogOut, User, ChevronDown} from 'lucide-react';
 
 const Settings = () => {
   // Estados del componente
@@ -278,6 +278,51 @@ const Settings = () => {
               <span className="text-sm font-medium text-gray-700">
                 Zoom actual: {zoomLevel}%
               </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Sección de Soporte */}
+        <div className="bg-gray-100 rounded-lg p-6 mt-6">
+          <div className="flex items-center space-x-3 mb-6">
+            
+            <h2 className="text-xl font-semibold text-gray-800">Soporte de la aplicación</h2>
+          </div>
+          
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <div className="text-center space-y-4">
+              <div>
+               
+                <h3 className="text-lg text-gray-800 font-semibold mt-1">Soporte técnico especializado</h3>
+                 <h4 className="font-semibold text-gray-600 ">Joel Fuentes</h4>
+              </div>
+              
+              <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-2 md:gap-4">
+                {/* Información de contacto telefónico */}
+                 <div className="flex items-center justify-center space-x-4 p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
+                
+                  <div className="text-center">
+                    <p className="text-lg font-semibold text-gray-800">Correo electrónico</p>
+                    <p className="text-sm text-gray-600 font-semibold">fuentesjoel723@gmail.com</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-center space-x-8 p-4 border-2 bg-cyan-50 rounded-xl  border-cyan-800">
+               
+                  <div className="text-center">
+                    <p className="text-lg font-semibold text-gray-800">Teléfono</p>
+                    <p className="text-sm text-cyan-800 font-semibold">+503 7722 0472</p>
+                  </div>
+                </div>
+                
+                {/* Información de contacto por correo */}
+               
+              </div>      
+              
+              <div className="mt-4 pt-3 border-t border-gray-200">
+                <p className="text-xs text-gray-500">
+                  Para asistencia técnica, dudas o problemas con la aplicación, no dudes en contactarnos.
+                </p>
+              </div>
             </div>
           </div>
         </div>
