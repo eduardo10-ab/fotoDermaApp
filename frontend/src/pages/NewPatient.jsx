@@ -17,7 +17,7 @@ const NewPatient = () => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    age: '',
+    birthDate: '',
     disease: '',
     consultationDate: ''
   });
@@ -36,6 +36,22 @@ const NewPatient = () => {
   
   // Referencias para elementos DOM
   const fileInputRef = useRef(null);
+
+  // Función para calcular la edad a partir de la fecha de nacimiento
+  const calculateAge = (birthDate) => {
+    if (!birthDate) return null;
+    
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    
+    return age;
+  };
 
   // Componente de notificación integrado
   const NotificationModal = ({ isVisible, type, message, onClose, duration = 5000 }) => {
@@ -164,7 +180,7 @@ const NewPatient = () => {
     setFormData({
       firstName: '',
       lastName: '',
-      age: '',
+      birthDate: '',
       disease: '',
       consultationDate: ''
     });
@@ -335,11 +351,15 @@ const NewPatient = () => {
         return dateString + 'T12:00:00.000Z';
       };
 
+      // Calcula la edad a partir de la fecha de nacimiento
+      const age = calculateAge(formData.birthDate);
+
       // Prepara los datos del paciente para enviar al backend
       const patientData = {
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
-        age: parseInt(formData.age),
+        age: age, // Edad calculada automáticamente
+        birthDate: formatDateForBackend(formData.birthDate), // Nueva fecha de nacimiento
         photos: uploadedPhotos,
         photo: uploadedPhotos.length > 0 ? uploadedPhotos[0].url : null, // Primera foto como principal
         disease: formData.disease.trim(),
@@ -389,7 +409,7 @@ const NewPatient = () => {
            />
           </div>
 
-          {/* Campos Apellidos y Edad */}
+          {/* Campos Apellidos y Fecha de Nacimiento */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-base font-medium text-gray-700 mb-2">
@@ -408,18 +428,16 @@ const NewPatient = () => {
 
             <div>
               <label className="block text-base font-medium text-gray-700 mb-2">
-                Edad *
+                Fecha de nacimiento *
               </label>
               <input
-                type="number"
-                name="age"
+                type="date"
+                name="birthDate"
                 required
-                min="1"
-                max="120"
-                value={formData.age}
+                value={formData.birthDate}
                 onChange={handleInputChange}
-                placeholder="Digite la edad"
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                max={new Date().toISOString().split('T')[0]} // No permite fechas futuras
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-500 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-600"
               />
             </div>
           </div>

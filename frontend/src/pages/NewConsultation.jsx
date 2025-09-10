@@ -21,11 +21,27 @@ const NewConsultation = () => {
     diagnosis: '',
     firstName: '',
     lastName: '',
-    age: ''
+    birthDate: ''
   });
 
   // Referencias para manejo de archivos
   const fileInputRef = useRef(null);
+
+  // Función para calcular la edad a partir de la fecha de nacimiento
+  const calculateAge = (birthDate) => {
+    if (!birthDate) return null;
+    
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    
+    return age;
+  };
 
   /**
    * Efecto para cargar datos del paciente al montar el componente
@@ -42,7 +58,7 @@ const NewConsultation = () => {
           ...prev,
           firstName: patientData.firstName || '',
           lastName: patientData.lastName || '',
-          age: patientData.age || ''
+          birthDate: patientData.birthDate ? patientData.birthDate.split('T')[0] : ''
         }));
       } catch (error) {
         // Datos por defecto si falla la carga del paciente
@@ -50,7 +66,7 @@ const NewConsultation = () => {
           id: patientId,
           firstName: 'Nombres',
           lastName: 'Apellidos',
-          age: 40,
+          birthDate: '1984-01-01',
           disease: 'Diagnostico'
         };
         setPatient(defaultPatient);
@@ -58,7 +74,7 @@ const NewConsultation = () => {
           ...prev,
           firstName: defaultPatient.firstName,
           lastName: defaultPatient.lastName,
-          age: defaultPatient.age
+          birthDate: defaultPatient.birthDate
         }));
       }
     };
@@ -142,18 +158,8 @@ const NewConsultation = () => {
     setLoading(true);
 
     try {
-      // Actualizar datos del paciente si han cambiado
-      if (patient && (
-        formData.firstName !== patient.firstName ||
-        formData.lastName !== patient.lastName ||
-        formData.age !== patient.age
-      )) {
-        await patientsAPI.update(patientId, {
-          firstName: formData.firstName.trim(),
-          lastName: formData.lastName.trim(),
-          age: parseInt(formData.age)
-        });
-      }
+      // Calcular la edad a partir de la fecha de nacimiento
+      const calculatedAge = calculateAge(formData.birthDate);
 
       // Función para formatear fecha para el backend
       const formatDateForBackend = (dateString) => {
@@ -167,6 +173,20 @@ const NewConsultation = () => {
         // Si viene solo la fecha (YYYY-MM-DD), agregarle tiempo del mediodía
         return dateString + 'T12:00:00.000Z';
       };
+
+      // Actualizar datos del paciente si han cambiado
+      if (patient && (
+        formData.firstName !== patient.firstName ||
+        formData.lastName !== patient.lastName ||
+        formData.birthDate !== (patient.birthDate ? patient.birthDate.split('T')[0] : '')
+      )) {
+        await patientsAPI.update(patientId, {
+          firstName: formData.firstName.trim(),
+          lastName: formData.lastName.trim(),
+          birthDate: formatDateForBackend(formData.birthDate),
+          age: calculatedAge // Incluir la edad calculada
+        });
+      }
 
       // Preparar datos de la consulta
       const consultationData = {
@@ -227,7 +247,7 @@ const NewConsultation = () => {
       diagnosis: '',
       firstName: patient?.firstName || '',
       lastName: patient?.lastName || '',
-      age: patient?.age || ''
+      birthDate: patient?.birthDate ? patient.birthDate.split('T')[0] : ''
     });
     
     setPhotos([]);
@@ -289,20 +309,16 @@ const NewConsultation = () => {
               className="w-full px-3 py-2 border border-gray-200 rounded-lg text-gray-700 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">Edad</label>
-            <input
-              type="number"
-              name="age"
-              value={formData.age}
-              onChange={handleInputChange}
-              min="1"
-              max="120"
-              required
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-gray-700 focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-            />
-          </div>
+        
         </div>
+        {/* Mostrar edad calculada */}
+        {formData.birthDate && (
+          <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+            <span className="text-sm text-gray-600">
+              Edad: <span className="font-medium">{calculateAge(formData.birthDate)} años</span>
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Formulario de nueva consulta */}
